@@ -1,8 +1,8 @@
-import cfscrape
 import logging
 import os
 
 BOT_TOKEN = os.environ["BOT_TOKEN"]
+AN_KEY = os.environ["AN_KEY"]
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
 PROXY_URL = os.environ.get("PROXY_URL")
 PROXY_USERNAME = os.environ.get("PROXY_USERNAME")
@@ -24,5 +24,3 @@ logging.basicConfig(
     format="%(asctime)s %(filename)s:%(lineno)d: %(message)s",
     datefmt="%d-%m-%Y %H:%M:%S"
 )
-
-scraper = cfscrape.create_scraper()

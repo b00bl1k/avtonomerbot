@@ -7,8 +7,8 @@ verify_ssl = true
 
 [packages]
 python-telegram-bot = "==12.*"
-cfscrape = "*"
 pysocks = "*"
+requests = "*"
 
 [requires]
 python_version = "3.7"
