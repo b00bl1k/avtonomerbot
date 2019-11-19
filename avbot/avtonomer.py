@@ -1,5 +1,9 @@
+import json
+import logging
 import re
 import requests
+
+logger = logging.getLogger(__name__)
 
 
 def translate_to_latin(text):
@@ -9,17 +13,22 @@ def translate_to_latin(text):
 
 
 def validate_plate_number(number):
-    res = re.match("^[abekmnopctyx]{1}\d{3}[abekmnopctyx]{2}\d{2,3}$", number)
+    res = re.match(r"^[abekmnopctyx]{1}\d{3}[abekmnopctyx]{2}\d{2,3}$", number)
     return res is not None
 
 
 def search(plate_number, key):
-    resp = requests.get(
-        "https://avto-nomer.ru/mobile/api_photo.php",
-        params={
-            "key": key,
-            "gal": 1,
-            "nomer": plate_number,
-        },
-    )
-    return resp.json()
+    try:
+        resp = requests.get(
+            "http://avto-nomer.ru/mobile/api_photo.php",
+            params={
+                "key": key,
+                "gal": 1,
+                "nomer": plate_number,
+            },
+        )
+        return resp.json()
+    except (json.decoder.JSONDecodeError,
+            requests.exceptions.ConnectionError) as e:
+        logger.error("search error", exc_info=e)
+        return None

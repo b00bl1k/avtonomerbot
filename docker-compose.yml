@@ -4,3 +4,7 @@ services:
     build: .
     env_file:
       - .env
+    depends_on:
+      - redis
+  redis:
+    image: "redis:alpine"

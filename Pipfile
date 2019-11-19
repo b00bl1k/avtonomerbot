@@ -9,6 +9,7 @@ verify_ssl = true
 python-telegram-bot = "==12.*"
 pysocks = "*"
 requests = "*"
+redis = "*"
 
 [requires]
 python_version = "3.7"
