@@ -7,12 +7,12 @@ from telegram.ext import (
     CallbackQueryHandler)
 import avtonomer
 import settings
-from utils import cached_func
+import cache
 
 logger = logging.getLogger(__name__)
 
 
-@cached_func(timedelta(minutes=10))
+@cache.cached_func(timedelta(minutes=10))
 def get_license_plate(plate_number):
     return avtonomer.search(plate_number, settings.AN_KEY)
 

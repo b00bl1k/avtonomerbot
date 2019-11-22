@@ -1,6 +1,9 @@
 from functools import wraps
 import pickle
-from settings import cache
+import redis
+import settings
+
+_cache = redis.StrictRedis.from_url(settings.REDIS_CACHE_URL)
 
 
 def cached_func(time):
@@ -8,12 +11,12 @@ def cached_func(time):
         @wraps(func)
         def wrapper(*args, **kwargs):
             key = pickle.dumps([args, kwargs])
-            cached_value = cache.get(key)
+            cached_value = _cache.get(key)
             if cached_value is not None:
                 return pickle.loads(cached_value)
             value = func(*args, **kwargs)
             if value is not None:
-                cache.setex(key, time, pickle.dumps(value))
+                _cache.setex(key, time, pickle.dumps(value))
             return value
         return wrapper
     return actual_decorator
