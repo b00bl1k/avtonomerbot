@@ -18,9 +18,6 @@ jobs:
       IMAGE_NAME: avbot
     docker:
       - image: docker:17.05.0-ce-git
-    branches:
-      only:
-        - master
     steps:
       - setup_remote_docker
       - run:
@@ -30,3 +27,14 @@ jobs:
             docker push $IMAGE_NAME:$CIRCLE_SHA1
             docker tag $IMAGE_NAME:$CIRCLE_SHA1 $IMAGE_NAME:latest
             docker push $IMAGE_NAME:latest
+workflows:
+  version: 2
+  main:
+    jobs:
+      - build:
+      - publish:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
