@@ -4,7 +4,8 @@ jobs:
     environment:
       IMAGE_NAME: b00bl1k/avbot
     working_directory: /app
-    machine: true
+    docker:
+      - image: docker:stable
     steps:
       - checkout
       - setup_remote_docker
@@ -15,7 +16,8 @@ jobs:
   publish:
     environment:
       IMAGE_NAME: avbot
-    machine: true
+    docker:
+      - image: docker:stable
     steps:
       - setup_remote_docker
       - run:
