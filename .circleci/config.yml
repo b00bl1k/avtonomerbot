@@ -1,0 +1,32 @@
+version: 2
+jobs:
+  build:
+    environment:
+      IMAGE_NAME: b00bl1k/avbot
+    working_directory: /app
+    docker:
+      - image: docker:17.05.0-ce-git
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build docker image
+          command: |
+            docker build -t $IMAGE_NAME:$CIRCLE_SHA1 .
+  publish:
+    environment:
+      IMAGE_NAME: avbot
+    docker:
+      - image: docker:17.05.0-ce-git
+    branches:
+      only:
+        - master
+    steps:
+      - setup_remote_docker
+      - run:
+          name: Publish Docker Image
+          command: |
+            echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+            docker push $IMAGE_NAME:$CIRCLE_SHA1
+            docker tag $IMAGE_NAME:$CIRCLE_SHA1 $IMAGE_NAME:latest
+            docker push $IMAGE_NAME:latest
