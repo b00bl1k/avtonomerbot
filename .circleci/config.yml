@@ -1,11 +1,13 @@
-version: 2
-jobs:
-  build:
+version: 2.1
+executors:
+  docker-publisher:
     environment:
       IMAGE_NAME: b00bl1k/avbot
-    working_directory: /app
     docker:
       - image: docker:stable
+jobs:
+  build:
+    executor: docker-publisher
     steps:
       - checkout
       - setup_remote_docker
@@ -13,15 +15,33 @@ jobs:
           name: Build docker image
           command: |
             docker build -t $IMAGE_NAME:$CIRCLE_SHA1 .
-  publish:
-    environment:
-      IMAGE_NAME: avbot
-    docker:
-      - image: docker:stable
+  build-master:
+    executor: docker-publisher
     steps:
+      - checkout
       - setup_remote_docker
       - run:
-          name: Publish Docker Image
+          name: Build docker image
+          command: |
+            docker build -t $IMAGE_NAME:$CIRCLE_SHA1 .
+      - run:
+          name: Archive docker image
+          command: docker save -o image.tar $IMAGE_NAME
+      - persist_to_workspace:
+          root: .
+          paths:
+             - ./image.tar
+  publish:
+    executor: docker-publisher
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - setup_remote_docker
+      - run:
+          name: Load archived docker image
+          command: docker load -i /tmp/workspace/image.tar
+      - run:
+          name: Publish docker image
           command: |
             echo "$DOCKERHUB_PASS" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
             docker push $IMAGE_NAME:$CIRCLE_SHA1
@@ -31,10 +51,15 @@ workflows:
   version: 2
   main:
     jobs:
-      - build
-      - publish:
-          requires:
-            - build
+      - build:
+          filters:
+            branches:
+              ignore: master
+      - build-master:
           filters:
             branches:
               only: master
+      - publish:
+          requires:
+            - build-master
+          context: global
