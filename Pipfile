@@ -10,6 +10,9 @@ python-telegram-bot = "==12.*"
 pysocks = "*"
 requests = "*"
 redis = "*"
+sqlalchemy = "*"
+alembic = "*"
+psycopg2-binary = "*"
 
 [requires]
 python_version = "3.7"

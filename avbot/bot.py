@@ -3,7 +3,7 @@ from telegram.ext import Updater
 import settings
 from commands import register_commands
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 def main():

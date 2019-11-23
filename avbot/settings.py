@@ -3,7 +3,8 @@ import os
 
 BOT_TOKEN = os.environ["BOT_TOKEN"]
 AN_KEY = os.environ["AN_KEY"]
-REDIS_CACHE_URL = os.environ.get["REDIS_CACHE_URL"]
+REDIS_CACHE_URL = os.environ["REDIS_CACHE_URL"]
+DATABASE_URL = os.environ["DATABASE_URL"]
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
 PROXY_URL = os.environ.get("PROXY_URL")
 PROXY_USERNAME = os.environ.get("PROXY_USERNAME")
@@ -22,6 +23,6 @@ REQUEST_KWARGS = (
 
 logging.basicConfig(
     level=getattr(logging, LOG_LEVEL.upper(), logging.INFO),
-    format="%(asctime)s %(filename)s:%(lineno)d: %(message)s",
+    format="%(levelname)s %(asctime)s %(name)s: %(message)s",
     datefmt="%d-%m-%Y %H:%M:%S"
 )
