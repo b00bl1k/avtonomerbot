@@ -56,10 +56,7 @@ def add_search_query(user, query_text):
 
 
 def get_search_query(search_query_id):
-    try:
-        return session.query(models.SearchQuery).get(search_query_id)
-    except NoResultFound:
-        return None
+    return session.query(models.SearchQuery).get(search_query_id)
 
 
 def add_inline_query(search_query, query):

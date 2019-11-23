@@ -13,7 +13,7 @@ def translate_to_latin(text):
 
 
 def validate_plate_number(number):
-    res = re.match(r"^[abekmnopctyx]{1}\d{3}[abekmnopctyx]{2}\d{2,3}$", number)
+    res = re.match(r"^[abekmhopctyx]{1}\d{3}[abekmhopctyx]{2}\d{2,3}$", number)
     return res is not None
 
 
