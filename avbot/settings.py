@@ -5,6 +5,7 @@ BOT_TOKEN = os.environ["BOT_TOKEN"]
 AN_KEY = os.environ["AN_KEY"]
 REDIS_CACHE_URL = os.environ["REDIS_CACHE_URL"]
 DATABASE_URL = os.environ["DATABASE_URL"]
+SENTRY_DSN = os.environ.get("SENTRY_DSN")
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
 PROXY_URL = os.environ.get("PROXY_URL")
 PROXY_USERNAME = os.environ.get("PROXY_USERNAME")
@@ -26,3 +27,7 @@ logging.basicConfig(
     format="%(levelname)s %(asctime)s %(name)s: %(message)s",
     datefmt="%d-%m-%Y %H:%M:%S"
 )
+
+if SENTRY_DSN:
+    import sentry_sdk
+    sentry_sdk.init(SENTRY_DSN)

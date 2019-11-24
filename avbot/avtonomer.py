@@ -17,6 +17,12 @@ def validate_plate_number(number):
     return res is not None
 
 
+def translate_to_cyrillic(number):
+    chars = ("abekmhopctyx", "АВЕКМНОРСТУХ")
+    table = dict([(ord(a), ord(b)) for (a, b) in zip(*chars)])
+    return number.translate(table)
+
+
 def search(plate_number, key):
     try:
         resp = requests.get(
