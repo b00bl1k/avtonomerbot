@@ -13,9 +13,20 @@ def main():
         use_context=True,
     )
     register_commands(updater.dispatcher)
-    updater.bot.set_webhook()
-    logger.info("started")
-    updater.start_polling(timeout=10)
+    if settings.WEBHOOK_URL:
+        updater.start_webhook(
+            listen=settings.WEBHOOK_HOST,
+            port=settings.WEBHOOK_PORT,
+            url_path=settings.WEBHOOK_PATH,
+        )
+        updater.bot.set_webhook(settings.WEBHOOK_URL)
+        logger.info("listen on {}:{}".format(
+            settings.WEBHOOK_HOST, settings.WEBHOOK_PORT
+        ))
+    else:
+        updater.bot.set_webhook()
+        updater.start_polling(timeout=10)
+        logger.info("started")
     updater.idle()
 
 
