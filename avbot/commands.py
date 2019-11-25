@@ -32,7 +32,7 @@ def ensure_user_created(telegram_id, from_user):
 def get_car_photo(car):
     url = car["photo"]["medium"]
     resp = requests.head(url)
-    if resp.ok:
+    if resp.status_code != 404:
         return url, False
     file_id = cache.get(PHOTO_NOT_FOUND)
     if file_id:
