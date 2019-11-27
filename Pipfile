@@ -13,7 +13,7 @@ redis = "*"
 sqlalchemy = "*"
 alembic = "*"
 psycopg2-binary = "*"
-sentry-sdk = "==0.13.2"
+sentry-sdk = "==0.13.4"
 
 [requires]
 python_version = "3.7"
