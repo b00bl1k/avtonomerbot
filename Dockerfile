@@ -1,7 +1,6 @@
-FROM python:3.7
+FROM python:3.7-alpine
 
-RUN apt-get update \
-    && apt-get install -y nodejs \
+RUN apk --update --no-cache add gcc musl-dev libffi-dev python3-dev postgresql-dev \
     && pip install pipenv==2018.11.26
 
 COPY Pipfile* /tmp/
