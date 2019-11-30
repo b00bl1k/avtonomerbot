@@ -1,6 +1,7 @@
 FROM python:3.7-alpine
 
-RUN apk --update --no-cache add gcc musl-dev libffi-dev python3-dev postgresql-dev \
+RUN apk --update --no-cache add gcc musl-dev libffi-dev python3-dev \
+    postgresql-dev nodejs \
     && pip install pipenv==2018.11.26
 
 COPY Pipfile* /tmp/
