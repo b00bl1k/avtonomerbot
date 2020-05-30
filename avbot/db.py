@@ -3,9 +3,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.exc import NoResultFound
+
 import models
 import settings
-
 
 engine = create_engine(settings.DATABASE_URL)
 Session = sessionmaker(bind=engine)

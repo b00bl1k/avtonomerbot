@@ -4,6 +4,7 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+pytest = "*"
 
 [packages]
 python-telegram-bot = "==12.*"
@@ -13,7 +14,7 @@ redis = "*"
 sqlalchemy = "*"
 alembic = "*"
 psycopg2-binary = "*"
-sentry-sdk = "==0.13.4"
+sentry-sdk = "*"
 cfscrape = "*"
 
 [requires]

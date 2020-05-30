@@ -1,22 +1,15 @@
 from datetime import timedelta
 from dateutil.parser import parse
 import logging
-from io import BytesIO
 from telegram import (
     Update, InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto)
 from telegram.ext import (
     CallbackContext, CommandHandler, Filters, MessageHandler,
     CallbackQueryHandler)
-import cfscrape
 
-import avtonomer
-import cache
-import db
-import settings
+import avtonomer, cache, db, settings
 
-PHOTO_NOT_FOUND = "assets/not-found.png"
 logger = logging.getLogger(__name__)
-scraper = cfscrape.create_scraper()
 
 
 @cache.cached_func(timedelta(minutes=10))
@@ -24,33 +17,16 @@ def get_license_plate(plate_number):
     return avtonomer.search(plate_number, settings.AN_KEY)
 
 
+@cache.cached_func(timedelta(minutes=30))
+def get_series_info(series_number):
+    return avtonomer.get_series(series_number)
+
+
 def ensure_user_created(telegram_id, from_user):
     return db.get_or_create_user(
         telegram_id, from_user.first_name, from_user.last_name,
         from_user.username, from_user.language_code
     )
-
-
-def get_car_photo(car):
-    url = car["photo"]["medium"]
-
-    file_id = cache.get(url)
-    if file_id:
-        return file_id, None
-
-    resp = scraper.get(url)
-    if resp.status_code == 200:
-        return BytesIO(resp.content), url
-
-    file_id = cache.get(PHOTO_NOT_FOUND)
-    if file_id:
-        return file_id, None
-
-    return open(PHOTO_NOT_FOUND, "rb"), PHOTO_NOT_FOUND
-
-
-def cache_car_photo(key, file_id):
-    cache.add(key, file_id)
 
 
 def get_car_caption(cars, search_query, page):
@@ -85,8 +61,8 @@ def get_car_reply_markup(cars, search_query, page):
 def on_start(update: Update, context: CallbackContext):
     telegram_id = update.message.chat.id
     ensure_user_created(telegram_id, update.message.from_user)
-    update.message.reply_text(
-        "Для поиска отправьте номер в формате а123аа123"
+    update.message.reply_markdown(
+        "Для поиска отправьте номер в формате `а777аа777` или `ааа777`"
     )
 
 
@@ -96,34 +72,67 @@ def on_help(update: Update, context: CallbackContext):
     )
 
 
+def search_license_plate(update: Update, user, plate_number):
+    search_query = db.add_search_query(user, plate_number)
+    result = get_license_plate(plate_number)
+    if not result:
+        update.message.reply_text("Сервис временно недоступен", quote=True)
+    elif result["error"] != 0:
+        update.message.reply_text(
+            "По вашему запросу ничего не найдено", quote=True
+        )
+    else:
+        page = 0
+        cars = result["cars"]
+        car = cars[page]
+        photo, key = avtonomer.get_car_photo(car)
+        logger.info(f"{photo} {key}")
+        message = update.message.reply_photo(
+            photo=photo,
+            caption=get_car_caption(cars, search_query, page),
+            reply_markup=get_car_reply_markup(cars, search_query, page),
+            quote=True,
+        )
+        if key:
+            avtonomer.cache_car_photo(key, message.photo[-1].file_id)
+
+
+def show_series_info(update: Update, user, series_number):
+    db.add_search_query(user, series_number)
+    result = get_series_info(series_number)
+    if result is False:
+        update.message.reply_text("Сервис временно недоступен", quote=True)
+    if result is not None:
+        logger.info(f"{series_number} {result}")
+        if result == 0:
+            update.message.reply_markdown(
+                f"В серии `{series_number}` пока нет ни одного номера",
+                quote=True,
+            )
+        else:
+            update.message.reply_markdown(
+                f"Количество фотографий в серии `{series_number}`: {result}",
+                quote=True,
+            )
+    else:
+        update.message.reply_text(
+            "Во время запроса произошла ошибка", quote=True,
+        )
+
+
 def on_search_query(update: Update, context: CallbackContext):
     telegram_id = update.message.chat.id
     user = ensure_user_created(telegram_id, update.message.from_user)
-    plate_number = avtonomer.translate_to_latin(update.message.text)
-    if not avtonomer.validate_plate_number(plate_number):
-        update.message.reply_text(
-            "Некорректный запрос. Введите номер в формате а001аа199"
-        )
+    query = avtonomer.translate_to_latin(update.message.text)
+    if avtonomer.validate_plate_number(query):
+        search_license_plate(update, user, query)
+    elif avtonomer.validate_plate_series(query):
+        show_series_info(update, user, query)
     else:
-        search_query = db.add_search_query(user, plate_number)
-        result = get_license_plate(plate_number)
-        if not result:
-            update.message.reply_text("Сервис временно недоступен")
-        elif result["error"] != 0:
-            update.message.reply_text("По вашему запросу ничего не найдено")
-        else:
-            page = 0
-            cars = result["cars"]
-            car = cars[page]
-            photo, key = get_car_photo(car)
-            logger.info(f"{photo} {key}")
-            message = update.message.reply_photo(
-                photo=photo,
-                caption=get_car_caption(cars, search_query, page),
-                reply_markup=get_car_reply_markup(cars, search_query, page)
-            )
-            if key:
-                cache_car_photo(key, message.photo[-1].file_id)
+        update.message.reply_text(
+            "Некорректный запрос. Введите номер в формате а001аа199 или ааа199.",
+            quote=True,
+        )
 
 
 def on_search_paginate(update: Update, context: CallbackContext):
@@ -140,7 +149,7 @@ def on_search_paginate(update: Update, context: CallbackContext):
         if result and result["error"] == 0:
             cars = result["cars"]
             car = cars[page]
-            photo, key = get_car_photo(car)
+            photo, key = avtonomer.get_car_photo(car)
             logger.info(f"{photo} {key}")
             caption = get_car_caption(cars, search_query, page)
             message = context.bot.edit_message_media(
@@ -150,7 +159,7 @@ def on_search_paginate(update: Update, context: CallbackContext):
                 message_id=query.message.message_id,
             )
             if key:
-                cache_car_photo(key, message.photo[-1].file_id)
+                avtonomer.cache_car_photo(key, message.photo[-1].file_id)
 
 
 def on_error(update: Update, context: CallbackContext):
