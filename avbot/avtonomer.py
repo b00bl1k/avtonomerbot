@@ -38,7 +38,7 @@ def translate_to_cyrillic(number):
 def search(plate_number, key):
     try:
         resp = requests.get(
-            "http://avto-nomer.ru/mobile/api_photo.php",
+            "https://avto-nomer.ru/mobile/api_photo.php",
             params={
                 "key": key,
                 "gal": 1,
@@ -54,7 +54,7 @@ def search(plate_number, key):
 
 def get_series(series_number):
     resp = scraper.get(
-        "http://avto-nomer.ru/ru/gallery.php?fastsearch={}*{}".format(
+        "https://avto-nomer.ru/ru/gallery.php?fastsearch={}*{}".format(
             series_number[:1],
             series_number[1:],
         )

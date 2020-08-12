@@ -7,7 +7,10 @@ from telegram.ext import (
     CallbackContext, CommandHandler, Filters, MessageHandler,
     CallbackQueryHandler)
 
-import avtonomer, cache, db, settings
+import avtonomer
+import cache
+import db
+import settings
 
 logger = logging.getLogger(__name__)
 
@@ -31,13 +34,14 @@ def ensure_user_created(telegram_id, from_user):
 
 def get_car_caption(cars, search_query, page):
     car = cars[page]
+    url = car["photo"]["link"].replace("http", "https")
     datetime = parse(car["date"])
     date = datetime.date().strftime("%d.%m.%Y")
     plate = avtonomer.translate_to_cyrillic(search_query.query_text)
     return (
         f"{plate} [{page + 1}/{len(cars)}] {date}\n"
         f"{car['make']} {car['model']}\n"
-        f"{car['photo']['link']}"
+        f"{url}"
     )
 
 
@@ -62,7 +66,7 @@ def on_start(update: Update, context: CallbackContext):
     telegram_id = update.message.chat.id
     ensure_user_created(telegram_id, update.message.from_user)
     update.message.reply_markdown(
-        "Для поиска отправьте номер в формате `а777аа777` или `ааа777`"
+        "Для поиска отправьте номер в формате `а123аа777` или `ааа777`"
     )
 
 
@@ -102,7 +106,7 @@ def show_series_info(update: Update, user, series_number):
     result = get_series_info(series_number)
     if result is False:
         update.message.reply_text("Сервис временно недоступен", quote=True)
-    if result is not None:
+    elif result is not None:
         logger.info(f"{series_number} {result}")
         if result == 0:
             update.message.reply_markdown(
@@ -121,18 +125,19 @@ def show_series_info(update: Update, user, series_number):
 
 
 def on_search_query(update: Update, context: CallbackContext):
-    telegram_id = update.message.chat.id
-    user = ensure_user_created(telegram_id, update.message.from_user)
-    query = avtonomer.translate_to_latin(update.message.text)
-    if avtonomer.validate_plate_number(query):
-        search_license_plate(update, user, query)
-    elif avtonomer.validate_plate_series(query):
-        show_series_info(update, user, query)
-    else:
-        update.message.reply_text(
-            "Некорректный запрос. Введите номер в формате а001аа199 или ааа199.",
-            quote=True,
-        )
+    if update.message:
+        telegram_id = update.message.chat.id
+        user = ensure_user_created(telegram_id, update.message.from_user)
+        query = avtonomer.translate_to_latin(update.message.text)
+        if avtonomer.validate_plate_number(query):
+            search_license_plate(update, user, query)
+        elif avtonomer.validate_plate_series(query):
+            show_series_info(update, user, query)
+        else:
+            update.message.reply_text(
+                "Некорректный запрос. Введите номер в формате `а123аа777` или `ааа777`.",
+                quote=True,
+            )
 
 
 def on_search_paginate(update: Update, context: CallbackContext):
