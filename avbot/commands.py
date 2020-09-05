@@ -134,8 +134,9 @@ def on_search_query(update: Update, context: CallbackContext):
         elif avtonomer.validate_plate_series(query):
             show_series_info(update, user, query)
         else:
-            update.message.reply_text(
-                "Некорректный запрос. Введите номер в формате `а123аа777` или `ааа777`.",
+            update.message.reply_markdown(
+                "Некорректный запрос. Введите номер в формате "
+                "`а123аа777` или `ааа777`.",
                 quote=True,
             )
 
@@ -165,6 +166,8 @@ def on_search_paginate(update: Update, context: CallbackContext):
             )
             if key:
                 avtonomer.cache_car_photo(key, message.photo[-1].file_id)
+        else:
+            logger.warning("Empty result %s", str(result))
 
 
 def on_error(update: Update, context: CallbackContext):

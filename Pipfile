@@ -16,6 +16,7 @@ alembic = "*"
 psycopg2-binary = "*"
 sentry-sdk = "*"
 cfscrape = "*"
+celery = {extras = ["redis"], version = "*"}
 
 [requires]
 python_version = "3.7"
