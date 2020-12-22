@@ -4,6 +4,7 @@ import json
 import logging
 import re
 import requests
+from sentry_sdk import start_transaction
 
 import cache
 
@@ -37,14 +38,15 @@ def translate_to_cyrillic(number):
 
 def search(plate_number, key):
     try:
-        resp = requests.get(
-            "https://avto-nomer.ru/mobile/api_photo.php",
-            params={
-                "key": key,
-                "gal": 1,
-                "nomer": plate_number,
-            },
-        )
+        with start_transaction(op="requests", name="get_api"):
+            resp = scraper.get(
+                "https://avto-nomer.ru/mobile/api_photo.php",
+                params={
+                    "key": key,
+                    "gal": 1,
+                    "nomer": plate_number,
+                },
+            )
         return resp.json()
     except (json.decoder.JSONDecodeError,
             requests.exceptions.ConnectionError) as e:
@@ -53,12 +55,13 @@ def search(plate_number, key):
 
 
 def get_series(series_number):
-    resp = scraper.get(
-        "https://avto-nomer.ru/ru/gallery.php?fastsearch={}*{}".format(
-            series_number[:1],
-            series_number[1:],
+    with start_transaction(op="requests", name="get_series"):
+        resp = scraper.get(
+            "https://avto-nomer.ru/ru/gallery.php?fastsearch={}*{}".format(
+                series_number[:1],
+                series_number[1:],
+            )
         )
-    )
     if resp.status_code != 200:
         return False
     res = re.search(r"Найдено номеров.*?<b>([\d\s]+)", resp.text)
@@ -73,7 +76,8 @@ def get_car_photo(car):
     if file_id:
         return file_id, None
 
-    resp = scraper.get(url)
+    with start_transaction(op="requests", name="get_photo"):
+        resp = scraper.get(url)
     if resp.status_code == 200:
         return BytesIO(resp.content), url
 

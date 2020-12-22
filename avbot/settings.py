@@ -6,6 +6,7 @@ AN_KEY = os.environ["AN_KEY"]
 REDIS_CACHE_URL = os.environ["REDIS_CACHE_URL"]
 DATABASE_URL = os.environ["DATABASE_URL"]
 SENTRY_DSN = os.environ.get("SENTRY_DSN")
+SENTRY_SAMPLE_RATE = float(os.environ.get("SENTRY_SAMPLE_RATE", 0.2))
 WEBHOOK_URL = os.environ.get("WEBHOOK_URL")
 WEBHOOK_PATH = os.environ.get("WEBHOOK_PATH", "/")
 WEBHOOK_HOST = os.environ.get("WEBHOOK_HOST", "localhost")
@@ -34,4 +35,4 @@ logging.basicConfig(
 
 if SENTRY_DSN:
     import sentry_sdk
-    sentry_sdk.init(SENTRY_DSN)
+    sentry_sdk.init(SENTRY_DSN, traces_sample_rate=SENTRY_SAMPLE_RATE)
