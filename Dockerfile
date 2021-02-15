@@ -1,7 +1,7 @@
 FROM python:3.9
 
 RUN apt update \
-    && apt install nodejs \
+    && apt install -y nodejs \
     && pip install pipenv==2020.11.15
 
 COPY Pipfile* /tmp/
