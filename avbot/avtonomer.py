@@ -47,7 +47,8 @@ def search(plate_number, key):
                     "nomer": plate_number,
                 },
             )
-        return resp.json()
+            if resp.status_code == 200:
+                return resp.json()
     except (json.decoder.JSONDecodeError,
             requests.exceptions.ConnectionError) as e:
         logger.error("search error", exc_info=e)

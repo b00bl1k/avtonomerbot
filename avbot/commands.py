@@ -2,7 +2,8 @@ from datetime import timedelta
 from dateutil.parser import parse
 import logging
 from telegram import (
-    Update, InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto)
+    Update, InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto,
+    ChatAction)
 from telegram.ext import (
     CallbackContext, CommandHandler, Filters, MessageHandler,
     CallbackQueryHandler)
@@ -126,6 +127,7 @@ def show_series_info(update: Update, user, series_number):
 
 def on_search_query(update: Update, context: CallbackContext):
     if update.message:
+        context.bot.send_chat_action(update.effective_user.id, ChatAction.TYPING)
         telegram_id = update.message.chat.id
         user = ensure_user_created(telegram_id, update.message.from_user)
         query = avtonomer.translate_to_latin(update.message.text)

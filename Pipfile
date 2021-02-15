@@ -19,4 +19,4 @@ cfscrape = "*"
 celery = {extras = ["redis"], version = "*"}
 
 [requires]
-python_version = "3.7"
+python_version = "3.9"
