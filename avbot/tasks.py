@@ -1,3 +1,4 @@
+import logging
 from datetime import timedelta
 
 import telegram
@@ -13,6 +14,7 @@ PHOTO_NOT_FOUND = "assets/not-found.png"
 
 app = Celery("avbot", broker=settings.CELERY_BROKER_URL)
 bot = telegram.Bot(token=settings.BOT_TOKEN)
+logger = logging.getLogger(__name__)
 
 
 def get_car_caption(car, plate, page, count):
@@ -125,7 +127,8 @@ def get_series_info(self, chat_id, message_id, search_query_id):
     if not result:
         result = avtonomer.get_series(series_number)
 
-    if not result:
+    if result is None:
+        logger.warning(f"Not data for query {series_number}")
         bot.send_message(
             chat_id, "Нет данных",
             reply_to_message_id=message_id,
