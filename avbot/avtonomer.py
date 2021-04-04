@@ -1,17 +1,32 @@
-import cfscrape
-from io import BytesIO
-import json
 import logging
 import re
-import requests
-from sentry_sdk import start_transaction
+from dataclasses import dataclass
+from datetime import date
+from io import BytesIO
+from typing import List
 
-import cache
-
-PHOTO_NOT_FOUND = "assets/not-found.png"
+import cfscrape
+from dateutil.parser import parse
 
 scraper = cfscrape.create_scraper()
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class AvCar:
+    make: str
+    model: str
+    date: date
+    page_url: str
+    photo_url: str
+    thumb_url: str
+
+
+@dataclass
+class AvSearchResult:
+    region: str
+    informer_url: str
+    cars: List[AvCar]
 
 
 def translate_to_latin(text):
@@ -36,61 +51,58 @@ def translate_to_cyrillic(number):
     return number.translate(table)
 
 
-def search(plate_number, key):
-    try:
-        with start_transaction(op="requests", name="get_api"):
-            resp = scraper.get(
-                "https://avto-nomer.ru/mobile/api_photo.php",
-                params={
-                    "key": key,
-                    "gal": 1,
-                    "nomer": plate_number,
-                },
+def ensure_https(url):
+    if url.lower().startswith("http:"):
+        return "https:" + url[5:]
+    return url
+
+
+def search(plate_number, key) -> AvSearchResult:
+    resp = scraper.get(
+        "https://avto-nomer.ru/mobile/api_photo.php",
+        params={
+            "key": key,
+            "gal": 1,
+            "nomer": plate_number,
+        },
+    )
+    resp.raise_for_status()
+    result = resp.json()
+    if result["error"] == 0:
+        cars = [
+            AvCar(
+                item["make"],
+                item["model"],
+                parse(item["date"]),
+                ensure_https(item["photo"]["link"]),
+                ensure_https(item["photo"]["original"]),
+                ensure_https(item["photo"]["medium"]),
             )
-            if resp.status_code == 200:
-                return resp.json()
-    except (json.decoder.JSONDecodeError,
-            requests.exceptions.ConnectionError) as e:
-        logger.error("search error", exc_info=e)
-        return None
+            for item in result["cars"]
+        ]
+        return AvSearchResult(
+            result["region"],
+            ensure_https(result["informer"]),
+            cars,
+        )
 
 
 def get_series(series_number):
-    with start_transaction(op="requests", name="get_series"):
-        resp = scraper.get(
-            "https://avto-nomer.ru/ru/gallery.php?fastsearch={}*{}".format(
-                series_number[:1],
-                series_number[1:],
-            )
+    resp = scraper.get(
+        "https://avto-nomer.ru/ru/gallery.php?fastsearch={}*{}".format(
+            series_number[:1],
+            series_number[1:],
         )
-    if resp.status_code != 200:
-        return False
+    )
+    resp.raise_for_status()
     res = re.search(r"Найдено номеров.*?<b>([\d\s]+)", resp.text)
     if res:
         return int(res.group(1).replace(" ", ""))
 
 
-def get_car_photo(car):
-    url = car["photo"]["medium"]
-
-    file_id = cache.get(url)
-    if file_id:
-        return file_id, None
-
-    with start_transaction(op="requests", name="get_photo"):
-        resp = scraper.get(url)
+def load_photo(path):
+    resp = scraper.get(path)
     if resp.status_code == 200:
-        return BytesIO(resp.content), url
-
-    if resp.status_code == 404:
-        file_id = cache.get(PHOTO_NOT_FOUND)
-        if file_id:
-            return file_id, None
-
-        return open(PHOTO_NOT_FOUND, "rb"), PHOTO_NOT_FOUND
-
-    return None, None
-
-
-def cache_car_photo(key, file_id):
-    cache.add(key, file_id)
+        return BytesIO(resp.content)
+    if resp.status_code != 404:
+        resp.raise_for_status()

@@ -1,12 +1,15 @@
 version: "3"
 services:
-  avbot:
+  avbot: &avbot
     build: .
     env_file:
       - .env
     depends_on:
       - redis
       - db
+  celery_worker:
+    <<: *avbot
+    command: celery -A tasks worker -l info
   redis:
     image: "redis:alpine"
   db:

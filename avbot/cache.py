@@ -11,7 +11,7 @@ def add(key, value, time=None):
     key = pickle.dumps(key)
     serialized_value = pickle.dumps(value)
     if time:
-        _cache.setex(key, time. serialized_value)
+        _cache.setex(key, time, serialized_value)
     else:
         _cache.set(key, serialized_value)
     return value
