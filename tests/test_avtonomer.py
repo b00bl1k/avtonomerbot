@@ -3,11 +3,19 @@ from unittest.mock import patch
 from avbot import avtonomer
 
 
-def test_validate_license_plate_number():
-    assert avtonomer.validate_plate_number("a123aa123")
-    assert avtonomer.validate_plate_number("a123aa12")
-    assert not avtonomer.validate_plate_number("a123aa1")
-    assert not avtonomer.validate_plate_number("aaa123")
+def test_validate_ru_license_plate():
+    assert avtonomer.validate_ru_plate_number("a123aa123")
+    assert avtonomer.validate_ru_plate_number("a123aa12")
+    assert not avtonomer.validate_ru_plate_number("a123aa1")
+    assert not avtonomer.validate_ru_plate_number("aaa123")
+
+
+def test_validate_su_license_plate():
+    assert avtonomer.validate_su_plate_number("ж8028ХА")
+    assert avtonomer.validate_su_plate_number("ж8028ха")
+    assert avtonomer.validate_su_plate_number("ж8028Н\u0406")
+    assert not avtonomer.validate_su_plate_number("ж8028Х")
+    assert not avtonomer.validate_su_plate_number("b8028ХА")
 
 
 def test_validate_plate_series():
@@ -39,7 +47,7 @@ def test_search(mockget):
         ]
     }
     mockget.return_value.json.return_value = data
-    result = avtonomer.search("a123aa123", "key")
+    result = avtonomer.search_ru("a123aa123", "key")
     assert result.region == "37"
     assert result.informer_url == "https://url1"
     assert len(result.cars) == 1
@@ -54,5 +62,21 @@ def test_search(mockget):
 
     data = {"error": 1}
     mockget.return_value.json.return_value = data
-    result = avtonomer.search("a123aa123", "key")
+    result = avtonomer.search_ru("a123aa123", "key")
     assert result is None
+
+
+@patch("avbot.avtonomer.scraper.get")
+def test_search_su(mockget):
+    with open("tests/su.html", "r") as f:
+        data = f.read()
+    mockget.return_value.text = data
+    result = avtonomer.search_su("с0274НІ")
+    assert len(result.cars) == 2
+    assert result.cars[0].make == "Opel"
+    assert result.cars[0].model == "Rekord"
+    assert result.cars[0].date.day == 7
+    assert result.cars[0].date.month == 4
+    assert result.cars[0].date.year == 2021
+    assert result.cars[0].page_url == "https://avto-nomer.ru/su/nomer16485152"
+    assert result.cars[0].thumb_url == "https://img03.platesmania.com/210407/m/16485152.jpg"

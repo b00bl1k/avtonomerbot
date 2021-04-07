@@ -22,6 +22,7 @@ class SearchQuery(Base):
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
     query_text = Column(String)
+    num_type = Column(String(32), nullable=False)
     created_at = Column(DateTime)
     inline_queries = relationship("InlineQuery")
 

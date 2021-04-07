@@ -48,7 +48,7 @@ class TelegramTask(Task):
     def on_failure(self, exc, task_id, args, kwargs, einfo):
         bot.send_message(
             args[0],
-            "Сервис временно недоступен",
+            "Произошла ошибка во время обработки запроса.",
             reply_to_message_id=args[1],
         )
 
@@ -63,11 +63,15 @@ class TelegramTask(Task):
 def search_license_plate(self, chat_id, message_id, search_query_id, page, edit):
     search_query = db.get_search_query(search_query_id)
     lp_num = search_query.query_text
-    key = f"avtonomer.search({lp_num})"
+    lp_type = search_query.num_type
+    key = f"avtonomer.search_{lp_type}({lp_num})"
 
     result = cache.get(key)
     if not result:
-        result = avtonomer.search(lp_num, settings.AN_KEY)
+        if lp_type == "ru":
+            result = avtonomer.search_ru(lp_num, settings.AN_KEY)
+        else:
+            result = avtonomer.search_su(lp_num)
 
     if not result:
         bot.send_message(

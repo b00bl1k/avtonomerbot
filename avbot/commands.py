@@ -1,7 +1,7 @@
 import logging
 
 from telegram import (
-    Update, InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto,
+    Update,
     ChatAction)
 from telegram.ext import (
     CallbackContext, CommandHandler, Filters, MessageHandler,
@@ -9,7 +9,6 @@ from telegram.ext import (
 
 import avtonomer
 import db
-import settings
 import tasks
 
 logger = logging.getLogger(__name__)
@@ -42,19 +41,27 @@ def on_search_query(update: Update, context: CallbackContext):
         chat_id = update.message.chat.id
         message_id = update.message.message_id
         user = ensure_user_created(chat_id, update.message.from_user)
-        query = avtonomer.translate_to_latin(update.message.text)
+        query = update.message.text
+        ru_query = avtonomer.translate_to_latin(query)
+        su_query = avtonomer.translate_to_cyr(query)
 
-        if avtonomer.validate_plate_number(query):
-            search_query = db.add_search_query(user, query)
+        if avtonomer.validate_ru_plate_number(ru_query):
+            search_query = db.add_search_query(user, ru_query)
             tasks.search_license_plate.delay(
                 chat_id, message_id, search_query.id, page=0, edit=False)
-        elif avtonomer.validate_plate_series(query):
-            search_query = db.add_search_query(user, query)
+        elif avtonomer.validate_su_plate_number(su_query):
+            search_query = db.add_search_query(user, su_query, "su")
+            tasks.search_license_plate.delay(
+                chat_id, message_id, search_query.id, page=0, edit=False)
+        elif avtonomer.validate_plate_series(ru_query):
+            search_query = db.add_search_query(user, ru_query)
             tasks.get_series_info.delay(chat_id, message_id, search_query.id)
         else:
             update.message.reply_markdown(
-                "Некорректный запрос. Введите номер в формате "
-                "`а123аа777` или `ааа777`.",
+                "Некорректный запрос. Введите:\n"
+                "• `а123аа777` — информация о номере РФ\n"
+                "• `а0069МО` — информация о номере СССР\n"
+                "• `ааа777` — информация о серии РФ",
                 quote=True,
             )
 

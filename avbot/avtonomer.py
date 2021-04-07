@@ -3,9 +3,10 @@ import re
 from dataclasses import dataclass
 from datetime import date
 from io import BytesIO
-from typing import List
+from typing import List, Union
 
 import cfscrape
+from bs4 import BeautifulSoup
 from dateutil.parser import parse
 
 scraper = cfscrape.create_scraper()
@@ -35,8 +36,19 @@ def translate_to_latin(text):
     return text.lower().translate(table)
 
 
-def validate_plate_number(number):
+def translate_to_cyr(text):
+    chars = ("iI", "\u0456\u0406")
+    table = dict([(ord(a), ord(b)) for (a, b) in zip(*chars)])
+    return text.lower().translate(table)
+
+
+def validate_ru_plate_number(number):
     res = re.match(r"^[abekmhopctyx]{1}\d{3}[abekmhopctyx]{2}\d{2,3}$", number)
+    return res is not None
+
+
+def validate_su_plate_number(number):
+    res = re.match(r"^[абвгдежзиклмнопрстуфхцчшщэюя\u0456]{1}\d{4}[абвгдежзиклмнопрстуфхцчшщэюя\u0456АБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЩЭЮЯ\u0406]{2}$", number)
     return res is not None
 
 
@@ -57,7 +69,7 @@ def ensure_https(url):
     return url
 
 
-def search(plate_number, key) -> AvSearchResult:
+def search_ru(plate_number, key) -> Union[AvSearchResult, None]:
     resp = scraper.get(
         "https://avto-nomer.ru/mobile/api_photo.php",
         params={
@@ -87,12 +99,49 @@ def search(plate_number, key) -> AvSearchResult:
         )
 
 
+def search_su(plate_number) -> Union[AvSearchResult, None]:
+    resp = scraper.get(
+        "http://avto-nomer.ru/su/gallery.php",
+        params={
+            "fastsearch": "{} {} {}".format(
+                plate_number[:1],
+                plate_number[1:5],
+                plate_number[5:],
+            ),
+        },
+    )
+    resp.raise_for_status()
+
+    doc = BeautifulSoup(resp.text, "html.parser")
+    panels = doc.select(".content .panel-body")
+    if len(panels) == 0:
+        return None
+
+    cars = []
+    for panel in panels:
+        page_url = "https://avto-nomer.ru{}".format(panel.select("a")[0]["href"])
+        thumb_url = ensure_https(panel.select("img")[0]["src"])
+        dt = parse(panel.select("small.pull-right")[0].text)
+        model_arr = panel.select("a")[1].text.split(" ", maxsplit=1)
+        if len(model_arr) == 2:
+            make, model = model_arr
+        else:
+            make = model_arr[0]
+            model = ""
+        cars.append(AvCar(make, model, dt, page_url, "", thumb_url))
+
+    return AvSearchResult("unknown", "", cars)
+
+
 def get_series(series_number):
     resp = scraper.get(
-        "https://avto-nomer.ru/ru/gallery.php?fastsearch={}*{}".format(
-            series_number[:1],
-            series_number[1:],
-        )
+        "https://avto-nomer.ru/ru/gallery.php",
+        params={
+            "fastsearch": "{}*{}".format(
+                series_number[:1],
+                series_number[1:],
+            ),
+        },
     )
     resp.raise_for_status()
     res = re.search(r"Найдено номеров.*?<b>([\d\s]+)", resp.text)
