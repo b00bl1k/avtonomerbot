@@ -10,4 +10,4 @@ RUN cd /tmp && pipenv lock --requirements > requirements.txt \
 
 ADD avbot /app
 WORKDIR /app
-CMD ["python", "bot.py"]
+CMD ["./start.sh"]

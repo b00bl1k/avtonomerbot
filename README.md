@@ -12,3 +12,8 @@ Telegram bot for avto-nomer.ru
 
 `docker pull b00bl1k/avbot`
 
+```
+alembic revision --autogenerate -m ""
+alembic downgrade -1
+alembic upgrade head
+```

@@ -1,6 +1,6 @@
 .idea
-.env
-.env_local
 .venv
 __pycache__
-avbot/alembic.ini
+.pytest_cache
+.env
+.env_local
