@@ -129,7 +129,7 @@ def get_series_ru(self, chat_id, message_id, search_query_id):
 
     result = cache.get(key)
     if not result:
-        result = avtonomer.get_series(series_number)
+        result = avtonomer.get_series_ru(series_number)
 
     if result is None:
         logger.warning(f"Not data for query {series_number}")
