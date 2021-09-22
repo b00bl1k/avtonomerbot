@@ -13,6 +13,14 @@ scraper = cfscrape.create_scraper()
 logger = logging.getLogger(__name__)
 
 
+US_STATES_ID = {
+    "pa": 7538,
+    "oh": 7535,
+    "nc": 7527,
+    "ny": 7534,
+}
+
+
 @dataclass
 class AvCar:
     make: str
@@ -44,17 +52,25 @@ def translate_to_cyr(text):
 
 def validate_ru_plate_number(number):
     res = re.match(r"^[abekmhopctyx]{1}\d{3}[abekmhopctyx]{2}\d{2,3}$", number)
-    return res is not None
+    return res
 
 
 def validate_su_plate_number(number):
     res = re.match(r"^[абвгдежзиклмнопрстуфхцчшщэюя\u0456]{1}\d{4}[абвгдежзиклмнопрстуфхцчшщэюя\u0456АБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЩЭЮЯ\u0406]{2}$", number)
-    return res is not None
+    return res
 
 
-def validate_plate_series(number):
+def validate_ru_plate_series(number):
     res = re.match(r"^[abekmhopctyx]{3}\d{2,3}$", number)
-    return res is not None
+    return res
+
+
+def validate_us_plate_series(number):
+    res = re.match(r"^([a-z]{2})\s+([a-z]{3})$", number)
+    if res:
+        state = res.groups()[0]
+        if state in US_STATES_ID.keys():
+            return res
 
 
 def translate_to_cyrillic(number):
@@ -133,7 +149,7 @@ def search_su(plate_number) -> Union[AvSearchResult, None]:
     return AvSearchResult("unknown", "", cars)
 
 
-def get_series(series_number):
+def get_series_ru(series_number):
     resp = scraper.get(
         "https://avto-nomer.ru/ru/gallery.php",
         params={
@@ -141,6 +157,21 @@ def get_series(series_number):
                 series_number[:1],
                 series_number[1:],
             ),
+        },
+    )
+    resp.raise_for_status()
+    res = re.search(r"Найдено номеров.*?<b>([\d\s]+)", resp.text)
+    if res:
+        return int(res.group(1).replace(" ", ""))
+
+
+def get_series_us(region, series_number):
+    resp = scraper.get(
+        "https://avto-nomer.ru/us/gallery.php",
+        params={
+            "gal": "us",
+            "region": region,
+            "nomer": "{} *".format(series_number),
         },
     )
     resp.raise_for_status()

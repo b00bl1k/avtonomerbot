@@ -53,9 +53,12 @@ def on_search_query(update: Update, context: CallbackContext):
             search_query = db.add_search_query(user, su_query, "su")
             tasks.search_license_plate.delay(
                 chat_id, message_id, search_query.id, page=0, edit=False)
-        elif avtonomer.validate_plate_series(ru_query):
+        elif avtonomer.validate_ru_plate_series(ru_query):
             search_query = db.add_search_query(user, ru_query)
-            tasks.get_series_info.delay(chat_id, message_id, search_query.id)
+            tasks.get_series_ru.delay(chat_id, message_id, search_query.id)
+        elif avtonomer.validate_us_plate_series(query):
+            search_query = db.add_search_query(user, query, "us")
+            tasks.get_series_us.delay(chat_id, message_id, search_query.id)
         else:
             update.message.reply_markdown(
                 "Некорректный запрос. Введите:\n"

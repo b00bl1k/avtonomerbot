@@ -122,10 +122,10 @@ def search_license_plate(self, chat_id, message_id, search_query_id, page, edit)
     retry_kwargs={"max_retries": 2},
     default_retry_delay=2,
 )
-def get_series_info(self, chat_id, message_id, search_query_id):
+def get_series_ru(self, chat_id, message_id, search_query_id):
     search_query = db.get_search_query(search_query_id)
     series_number = search_query.query_text
-    key = f"avtonomer.get_series({series_number})"
+    key = f"avtonomer.get_series_ru({series_number})"
 
     result = cache.get(key)
     if not result:
@@ -146,6 +146,46 @@ def get_series_info(self, chat_id, message_id, search_query_id):
         f"В серии `{series_number}` пока нет ни одного номера"
         if result == 0
         else f"Количество фотографий в серии `{series_number}`: {result}"
+    )
+    bot.send_message(
+        chat_id,
+        message,
+        parse_mode="Markdown",
+        reply_to_message_id=message_id,
+    )
+
+@app.task(
+    base=TelegramTask,
+    bind=True,
+    autoretry_for=(RequestException, ),
+    retry_kwargs={"max_retries": 2},
+    default_retry_delay=2,
+)
+def get_series_us(self, chat_id, message_id, search_query_id):
+    search_query = db.get_search_query(search_query_id)
+    result = avtonomer.validate_us_plate_series(search_query.query_text)
+    state, series_number = result.groups()
+    key = f"avtonomer.get_series_us({state}, {series_number})"
+    state_id = avtonomer.US_STATES_ID[state]
+
+    result = cache.get(key)
+    if not result:
+        result = avtonomer.get_series_us(state_id, series_number)
+
+    if result is None:
+        logger.warning(f"Not data for query {series_number}")
+        bot.send_message(
+            chat_id, "Нет данных",
+            reply_to_message_id=message_id,
+        )
+        return
+
+    cache.add(key, result, timedelta(minutes=5))
+
+    message = (
+        f"В серии `{series_number}` штата `{state}` пока нет ни одного номера"
+        if result == 0
+        else f"Количество фотографий в серии `{series_number}` штата `{state}`: {result}"
     )
     bot.send_message(
         chat_id,
