@@ -166,11 +166,11 @@ def get_series_us(self, chat_id, message_id, search_query_id):
     result = avtonomer.validate_us_plate_series(search_query.query_text)
     state, series_number = result.groups()
     key = f"avtonomer.get_series_us({state}, {series_number})"
-    state_id = avtonomer.US_STATES_ID[state]
+    state_id, ctype_id = avtonomer.US_STATES_ID[state]
 
     result = cache.get(key)
     if not result:
-        result = avtonomer.get_series_us(state_id, series_number)
+        result = avtonomer.get_series_us(state_id, ctype_id, series_number)
 
     if result is None:
         logger.warning(f"Not data for query {series_number}")

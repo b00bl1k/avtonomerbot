@@ -13,11 +13,12 @@ scraper = cfscrape.create_scraper()
 logger = logging.getLogger(__name__)
 
 
+# region, type
 US_STATES_ID = {
-    "pa": 7538,
-    "oh": 7535,
-    "nc": 7527,
-    "ny": 7534,
+    "pa": (7538, 111),
+    "oh": (7535, 71),
+    "nc": (7527, 101),
+    "ny": (7534, 21),
 }
 
 
@@ -165,12 +166,13 @@ def get_series_ru(series_number):
         return int(res.group(1).replace(" ", ""))
 
 
-def get_series_us(region, series_number):
+def get_series_us(region, ctype, series_number):
     resp = scraper.get(
         "https://avto-nomer.ru/us/gallery.php",
         params={
             "gal": "us",
             "region": region,
+            "ctype": ctype,
             "nomer": "{} *".format(series_number),
         },
     )
