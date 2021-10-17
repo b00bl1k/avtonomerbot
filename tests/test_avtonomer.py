@@ -19,10 +19,10 @@ def test_validate_su_license_plate():
 
 
 def test_validate_plate_series():
-    assert avtonomer.validate_plate_series("aaa199")
-    assert avtonomer.validate_plate_series("aaa19")
-    assert not avtonomer.validate_plate_series("aa199")
-    assert not avtonomer.validate_plate_series("aaaa199")
+    assert avtonomer.validate_ru_plate_series("aaa199")
+    assert avtonomer.validate_ru_plate_series("aaa19")
+    assert not avtonomer.validate_ru_plate_series("aa199")
+    assert not avtonomer.validate_ru_plate_series("aaaa199")
 
 
 @patch("avbot.avtonomer.scraper.get")
@@ -80,3 +80,13 @@ def test_search_su(mockget):
     assert result.cars[0].date.year == 2021
     assert result.cars[0].page_url == "https://avto-nomer.ru/su/nomer16485152"
     assert result.cars[0].thumb_url == "https://img03.platesmania.com/210407/m/16485152.jpg"
+
+
+def test_series_ru_url():
+    url = avtonomer.get_series_ru_url("ack13")
+    assert "https://avto-nomer.ru/ru/gallery.php?fastsearch=a%2Ack13" == url
+
+
+def test_series_us_url():
+    url = avtonomer.get_series_us_url(1, 2, "rbb")
+    assert "https://avto-nomer.ru/us/gallery.php?gal=us&region=1&ctype=2&nomer=rbb+%2A" == url

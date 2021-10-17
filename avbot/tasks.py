@@ -141,11 +141,12 @@ def get_series_ru(self, chat_id, message_id, search_query_id):
 
     cache.add(key, result, timedelta(minutes=5))
 
+    url = avtonomer.get_series_ru_url(series_number)
     series_number = avtonomer.translate_to_cyrillic(series_number)
     message = (
-        f"В серии `{series_number}` пока нет ни одного номера"
+        f"В серии [{series_number}]({url}) пока нет ни одного номера"
         if result == 0
-        else f"Количество фотографий в серии `{series_number}`: {result}"
+        else f"Количество фотографий в серии [{series_number}]({url}): {result}"
     )
     bot.send_message(
         chat_id,
@@ -182,10 +183,11 @@ def get_series_us(self, chat_id, message_id, search_query_id):
 
     cache.add(key, result, timedelta(minutes=5))
 
+    url = avtonomer.get_series_us_url(state_id, ctype_id, series_number)
     message = (
-        f"В серии `{series_number}` штата `{state}` пока нет ни одного номера"
+        f"В серии [{series_number}]({url}) штата `{state}` пока нет ни одного номера"
         if result == 0
-        else f"Количество фотографий в серии `{series_number}` штата `{state}`: {result}"
+        else f"Количество фотографий в серии [{series_number}]({url}) штата `{state}`: {result}"
     )
     bot.send_message(
         chat_id,

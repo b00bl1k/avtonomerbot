@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from datetime import date
 from io import BytesIO
 from typing import List, Union
+from requests import Request
 
 import cfscrape
 from bs4 import BeautifulSoup
@@ -150,6 +151,19 @@ def search_su(plate_number) -> Union[AvSearchResult, None]:
     return AvSearchResult("unknown", "", cars)
 
 
+def get_series_ru_url(series_number):
+    return Request(
+        "GET",
+        "https://avto-nomer.ru/ru/gallery.php",
+        params={
+            "fastsearch": "{}*{}".format(
+                series_number[:1],
+                series_number[1:],
+            ),
+        },
+    ).prepare().url
+
+
 def get_series_ru(series_number):
     resp = scraper.get(
         "https://avto-nomer.ru/ru/gallery.php",
@@ -164,6 +178,19 @@ def get_series_ru(series_number):
     res = re.search(r"Найдено номеров.*?<b>([\d\s]+)", resp.text)
     if res:
         return int(res.group(1).replace(" ", ""))
+
+
+def get_series_us_url(region, ctype, series_number):
+    return Request(
+        "GET",
+        "https://avto-nomer.ru/us/gallery.php",
+        params={
+            "gal": "us",
+            "region": region,
+            "ctype": ctype,
+            "nomer": "{} *".format(series_number),
+        },
+    ).prepare().url
 
 
 def get_series_us(region, ctype, series_number):
