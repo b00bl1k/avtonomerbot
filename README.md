@@ -8,12 +8,6 @@ Telegram bot for avto-nomer.ru
 
 ## Docker
 
-[![](https://images.microbadger.com/badges/image/b00bl1k/avbot.svg)](https://microbadger.com/images/b00bl1k/avbot "Get your own image badge on microbadger.com")
+![Docker Image Size (tag)](https://img.shields.io/docker/image-size/b00bl1k/avbot/latest)
 
 `docker pull b00bl1k/avbot`
-
-```
-alembic revision --autogenerate -m ""
-alembic downgrade -1
-alembic upgrade head
-```
