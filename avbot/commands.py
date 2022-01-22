@@ -13,6 +13,11 @@ import tasks
 
 logger = logging.getLogger(__name__)
 
+INPUT_FORMATS = """• `а123аа777` — информация о номере РФ
+• `ааа777` — информация о серии РФ
+• `а0069МО` — информация о номере СССР"""
+HELP = f"Бот для поиска по сайту avto-nomer.ru\n\nВведите:\n{INPUT_FORMATS}"
+
 
 def ensure_user_created(telegram_id, from_user):
     return db.get_or_create_user(
@@ -21,18 +26,14 @@ def ensure_user_created(telegram_id, from_user):
     )
 
 
-def on_start(update: Update, context: CallbackContext):
+def on_start_command(update: Update, context: CallbackContext):
     telegram_id = update.message.chat.id
     ensure_user_created(telegram_id, update.message.from_user)
-    update.message.reply_markdown(
-        "Для поиска отправьте номер в формате `а123аа777` или `ааа777`"
-    )
+    update.message.reply_markdown(HELP,)
 
 
-def on_help(update: Update, context: CallbackContext):
-    update.message.reply_text(
-        "Бот для поиска по сайту avto-nomer.ru"
-    )
+def on_help_command(update: Update, context: CallbackContext):
+    update.message.reply_markdown(HELP)
 
 
 def on_search_query(update: Update, context: CallbackContext):
@@ -61,10 +62,7 @@ def on_search_query(update: Update, context: CallbackContext):
             tasks.get_series_us.delay(chat_id, message_id, search_query.id)
         else:
             update.message.reply_markdown(
-                "Некорректный запрос. Введите:\n"
-                "• `а123аа777` — информация о номере РФ\n"
-                "• `а0069МО` — информация о номере СССР\n"
-                "• `ааа777` — информация о серии РФ",
+                f"Некорректный запрос. Введите:\n{INPUT_FORMATS}",
                 quote=True,
             )
 
@@ -93,8 +91,8 @@ def on_error(update: Update, context: CallbackContext):
 
 
 def register_commands(dispatcher):
-    dispatcher.add_handler(CommandHandler("start", on_start))
-    dispatcher.add_handler(CommandHandler("help", on_help))
+    dispatcher.add_handler(CommandHandler("start", on_start_command))
+    dispatcher.add_handler(CommandHandler("help", on_help_command))
     dispatcher.add_handler(MessageHandler(Filters.text, on_search_query))
     dispatcher.add_handler(CallbackQueryHandler(on_search_paginate))
     dispatcher.add_error_handler(on_error)

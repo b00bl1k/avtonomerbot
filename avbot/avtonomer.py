@@ -87,47 +87,7 @@ def ensure_https(url):
     return url
 
 
-def search_ru(plate_number, key) -> Union[AvSearchResult, None]:
-    resp = scraper.get(
-        "https://avto-nomer.ru/mobile/api_photo.php",
-        params={
-            "key": key,
-            "gal": 1,
-            "nomer": plate_number,
-        },
-    )
-    resp.raise_for_status()
-    result = resp.json()
-    if result["error"] == 0:
-        cars = [
-            AvCar(
-                item["make"],
-                item["model"],
-                parse(item["date"]),
-                ensure_https(item["photo"]["link"]),
-                ensure_https(item["photo"]["original"]),
-                ensure_https(item["photo"]["medium"]),
-            )
-            for item in result["cars"]
-        ]
-        return AvSearchResult(
-            result["region"],
-            ensure_https(result["informer"]),
-            cars,
-        )
-
-
-def search_su(plate_number) -> Union[AvSearchResult, None]:
-    resp = scraper.get(
-        "http://avto-nomer.ru/su/gallery.php",
-        params={
-            "fastsearch": "{} {} {}".format(
-                plate_number[:1],
-                plate_number[1:5],
-                plate_number[5:],
-            ),
-        },
-    )
+def search_generic(resp) -> Union[AvSearchResult, None]:
     resp.raise_for_status()
 
     doc = BeautifulSoup(resp.text, "html.parser")
@@ -149,6 +109,30 @@ def search_su(plate_number) -> Union[AvSearchResult, None]:
         cars.append(AvCar(make, model, dt, page_url, "", thumb_url))
 
     return AvSearchResult("unknown", "", cars)
+
+
+def search_ru(plate_number, key) -> Union[AvSearchResult, None]:
+    resp = scraper.get(
+        "http://avto-nomer.ru/ru/gallery.php",
+        params={
+            "fastsearch": plate_number,
+        },
+    )
+    return search_generic(resp)
+
+
+def search_su(plate_number) -> Union[AvSearchResult, None]:
+    resp = scraper.get(
+        "http://avto-nomer.ru/su/gallery.php",
+        params={
+            "fastsearch": "{} {} {}".format(
+                plate_number[:1],
+                plate_number[1:5],
+                plate_number[5:],
+            ),
+        },
+    )
+    return search_generic(resp)
 
 
 def get_series_ru_url(series_number):
