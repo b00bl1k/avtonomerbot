@@ -69,7 +69,7 @@ def search_license_plate(self, chat_id, message_id, search_query_id, page, edit)
     result = cache.get(key)
     if not result:
         if lp_type == "ru":
-            result = avtonomer.search_ru(lp_num, settings.AN_KEY)
+            result = avtonomer.search_ru(lp_num)
         else:
             result = avtonomer.search_su(lp_num)
 
@@ -129,10 +129,17 @@ def get_series_ru(self, chat_id, message_id, search_query_id):
 
     result = cache.get(key)
     if not result:
-        result = avtonomer.get_series_ru(series_number)
+        result = avtonomer.search_ru(
+            fastsearch="{}*{}".format(
+                series_number[:1],
+                series_number[1:],
+            ),
+        )
+        if result is not None:
+            result = result.total_results
 
     if result is None:
-        logger.warning(f"Not data for query {series_number}")
+        logger.warning(f"No data for query {series_number}")
         bot.send_message(
             chat_id, "Нет данных",
             reply_to_message_id=message_id,
@@ -154,6 +161,7 @@ def get_series_ru(self, chat_id, message_id, search_query_id):
         parse_mode="Markdown",
         reply_to_message_id=message_id,
     )
+
 
 @app.task(
     base=TelegramTask,
@@ -189,6 +197,51 @@ def get_series_us(self, chat_id, message_id, search_query_id):
         if result == 0
         else f"Количество фотографий в серии [{series_number}]({url}) штата `{state}`: {result}"
     )
+    bot.send_message(
+        chat_id,
+        message,
+        parse_mode="Markdown",
+        reply_to_message_id=message_id,
+    )
+
+
+@app.task(
+    base=TelegramTask,
+    bind=True,
+    autoretry_for=(RequestException, ),
+    retry_kwargs={"max_retries": 2},
+    default_retry_delay=2,
+)
+def get_ru_region(self, chat_id, message_id, search_query_id):
+    search_query = db.get_search_query(search_query_id)
+    result = avtonomer.validate_ru_region(search_query.query_text)
+    region = result.groups()[0]
+    key = f"avtonomer.get_ru_region({region})"
+    region_name, region_id = avtonomer.RU_REGIONS_ID[region]
+
+    result = cache.get(key)
+    if not result:
+        result = avtonomer.search_ru(
+            ctype=1,
+            regions=[region],
+            tags=[avtonomer.TAG_NEW_LETTER_COMBINATION],
+        )
+
+    cache.add(key, result, timedelta(minutes=5))
+
+    message = f"Регион *{region}* — {region_name}"
+    if result is not None:
+        message += "\n\nСвежие серии:\n"
+        message += "\n".join([
+            "• {} /{} — {} {}".format(
+                car.date,
+                avtonomer.translate_to_latin(
+                    car.license_plate.replace(" ", "")).upper(),
+                car.make,
+                car.model,
+            )
+            for car in result.cars
+        ])
     bot.send_message(
         chat_id,
         message,

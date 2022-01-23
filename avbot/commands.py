@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 INPUT_FORMATS = """• `а123аа777` — информация о номере РФ
 • `ааа777` — информация о серии РФ
+• `ru05` — информация о регионе РФ
 • `а0069МО` — информация о номере СССР"""
 HELP = f"Бот для поиска по сайту avto-nomer.ru\n\nВведите:\n{INPUT_FORMATS}"
 
@@ -43,6 +44,9 @@ def on_search_query(update: Update, context: CallbackContext):
         message_id = update.message.message_id
         user = ensure_user_created(chat_id, update.message.from_user)
         query = update.message.text
+        if query.startswith("/"):  # handle as normal request
+            query = query[1:]
+
         ru_query = avtonomer.translate_to_latin(query)
         su_query = avtonomer.translate_to_cyr(query)
 
@@ -60,6 +64,9 @@ def on_search_query(update: Update, context: CallbackContext):
         elif avtonomer.validate_us_plate_series(query):
             search_query = db.add_search_query(user, query, "us")
             tasks.get_series_us.delay(chat_id, message_id, search_query.id)
+        elif avtonomer.validate_ru_region(query):
+            search_query = db.add_search_query(user, query)
+            tasks.get_ru_region.delay(chat_id, message_id, search_query.id)
         else:
             update.message.reply_markdown(
                 f"Некорректный запрос. Введите:\n{INPUT_FORMATS}",

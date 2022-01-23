@@ -26,47 +26,6 @@ def test_validate_plate_series():
 
 
 @patch("avbot.avtonomer.scraper.get")
-def test_search(mockget):
-    data = {
-        "error": 0,
-        "region": "37",
-        "informer": "http://url1",
-        "cars": [
-            {
-                "make": "Mitsubishi",
-                "model": "Outlander XL",
-                "date": "2019-03-21 21:51:58",
-                "photo":
-                {
-                    "link": "http://url2",
-                    "small": "http://url3",
-                    "medium": "http://url4",
-                    "original": "http://url5"
-                }
-            }
-        ]
-    }
-    mockget.return_value.json.return_value = data
-    result = avtonomer.search_ru("a123aa123", "key")
-    assert result.region == "37"
-    assert result.informer_url == "https://url1"
-    assert len(result.cars) == 1
-    assert result.cars[0].make == "Mitsubishi"
-    assert result.cars[0].model == "Outlander XL"
-    assert result.cars[0].date.day == 21
-    assert result.cars[0].date.month == 3
-    assert result.cars[0].date.year == 2019
-    assert result.cars[0].page_url == "https://url2"
-    assert result.cars[0].photo_url == "https://url5"
-    assert result.cars[0].thumb_url == "https://url4"
-
-    data = {"error": 1}
-    mockget.return_value.json.return_value = data
-    result = avtonomer.search_ru("a123aa123", "key")
-    assert result is None
-
-
-@patch("avbot.avtonomer.scraper.get")
 def test_search_su(mockget):
     with open("tests/su.html", "r") as f:
         data = f.read()
@@ -80,6 +39,7 @@ def test_search_su(mockget):
     assert result.cars[0].date.year == 2021
     assert result.cars[0].page_url == "https://avto-nomer.ru/su/nomer16485152"
     assert result.cars[0].thumb_url == "https://img03.platesmania.com/210407/m/16485152.jpg"
+    assert result.cars[0].license_plate == "с 0274 НІ"
 
 
 def test_series_ru_url():
