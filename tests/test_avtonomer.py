@@ -26,7 +26,7 @@ def test_validate_plate_series():
 
 
 @patch("avbot.avtonomer.scraper.get")
-def test_search_su(mockget):
+def test_search_su_is_success(mockget):
     with open("tests/su.html", "r") as f:
         data = f.read()
     mockget.return_value.text = data
@@ -40,6 +40,21 @@ def test_search_su(mockget):
     assert result.cars[0].page_url == "https://avto-nomer.ru/su/nomer16485152"
     assert result.cars[0].thumb_url == "https://img03.platesmania.com/210407/m/16485152.jpg"
     assert result.cars[0].license_plate == "с 0274 НІ"
+
+
+@patch("avbot.avtonomer.scraper.get")
+def test_search_ru_is_failed_because_no_data(mockget):
+    mockget.return_value.text = ""
+    result = avtonomer.search_ru("а111аа777")
+    assert result is None
+
+
+@patch("avbot.avtonomer.scraper.get")
+def test_search_ru_is_success(mockget):
+    mockget.return_value.text = "Найдено номеров <b>1 000</b>"
+    result = avtonomer.search_ru("а111аа777")
+    assert result.total_results == 1000
+    assert len(result.cars) == 0
 
 
 def test_series_ru_url():

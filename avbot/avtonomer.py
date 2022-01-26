@@ -185,8 +185,6 @@ class AvCar:
 
 @dataclass
 class AvSearchResult:
-    region: str
-    informer_url: str
     total_results: int
     cars: List[AvCar]
 
@@ -227,7 +225,7 @@ def validate_us_plate_series(number):
 
 
 def validate_ru_region(req):
-    res = re.match(r"^ru(\d{2,3})$", req)
+    res = re.match(r"^ru(\d{2,3})$", req.lower())
     if res:
         state = res.groups()[0]
         if state in RU_REGIONS_ID.keys():
@@ -249,16 +247,12 @@ def ensure_https(url):
 def parse_search_results(resp) -> Union[AvSearchResult, None]:
     resp.raise_for_status()
     res = re.search(r"Найдено номеров.*?<b>([\d\s]+)", resp.text)
-    total_results = (
-        int(res.group(1).replace(" ", ""))
-        if res
-        else 0
-    )
+    if not res:
+        return None
+    total_results = int(res.group(1).replace(" ", ""))
 
     doc = BeautifulSoup(resp.text, "html.parser")
     panels = doc.select(".content .panel-body")
-    if len(panels) == 0:
-        return None
 
     cars = []
     for panel in panels:
@@ -274,7 +268,7 @@ def parse_search_results(resp) -> Union[AvSearchResult, None]:
             model = ""
         cars.append(AvCar(make, model, dt, page_url, "", thumb_url, license_plate))
 
-    return AvSearchResult("unknown", "", total_results, cars)
+    return AvSearchResult(total_results, cars)
 
 
 def search_ru(fastsearch=None, ctype=None, regions=None, tags=None) -> Union[AvSearchResult, None]:

@@ -73,7 +73,15 @@ def search_license_plate(self, chat_id, message_id, search_query_id, page, edit)
         else:
             result = avtonomer.search_su(lp_num)
 
-    if not result:
+    if result is None:
+        logger.warning(f"No data for query {lp_num} {lp_type}")
+        bot.send_message(
+            chat_id, "Нет данных",
+            reply_to_message_id=message_id,
+        )
+        return
+
+    if not result.total_results:
         bot.send_message(
             chat_id, "По вашему запросу ничего не найдено",
             reply_to_message_id=message_id,
