@@ -238,7 +238,7 @@ def get_ru_region(self, chat_id, message_id, search_query_id):
     cache.add(key, result, timedelta(minutes=5))
 
     message = f"Регион *{region}* — {region_name}"
-    if result is not None:
+    if result is not None and result.total_results > 0:
         message += "\n\nСвежие серии:\n"
         message += "\n".join([
             "• {} /{} — {} {}".format(
