@@ -11,6 +11,7 @@ import db
 import settings
 
 PHOTO_NOT_FOUND = "assets/not-found.png"
+TASKS_TIME_LIMIT = 15
 
 app = Celery("avbot", broker=settings.CELERY_BROKER_URL)
 bot = telegram.Bot(token=settings.BOT_TOKEN)
@@ -59,6 +60,7 @@ class TelegramTask(Task):
     autoretry_for=(RequestException, ),
     retry_kwargs={"max_retries": 2},
     default_retry_delay=2,
+    soft_time_limit=TASKS_TIME_LIMIT,
 )
 def search_license_plate(self, chat_id, message_id, search_query_id, page, edit):
     search_query = db.get_search_query(search_query_id)
@@ -129,6 +131,7 @@ def search_license_plate(self, chat_id, message_id, search_query_id, page, edit)
     autoretry_for=(RequestException, ),
     retry_kwargs={"max_retries": 2},
     default_retry_delay=2,
+    soft_time_limit=TASKS_TIME_LIMIT,
 )
 def get_series_ru(self, chat_id, message_id, search_query_id):
     search_query = db.get_search_query(search_query_id)
@@ -177,6 +180,7 @@ def get_series_ru(self, chat_id, message_id, search_query_id):
     autoretry_for=(RequestException, ),
     retry_kwargs={"max_retries": 2},
     default_retry_delay=2,
+    soft_time_limit=TASKS_TIME_LIMIT,
 )
 def get_series_us(self, chat_id, message_id, search_query_id):
     search_query = db.get_search_query(search_query_id)
@@ -219,6 +223,7 @@ def get_series_us(self, chat_id, message_id, search_query_id):
     autoretry_for=(RequestException, ),
     retry_kwargs={"max_retries": 2},
     default_retry_delay=2,
+    soft_time_limit=TASKS_TIME_LIMIT,
 )
 def get_ru_region(self, chat_id, message_id, search_query_id):
     search_query = db.get_search_query(search_query_id)
