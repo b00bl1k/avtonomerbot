@@ -14,6 +14,7 @@ scraper = cfscrape.create_scraper()
 logger = logging.getLogger(__name__)
 
 TAG_NEW_LETTER_COMBINATION = 13
+AN_BASE_URL = "https://platesmania.com"
 
 # region, type
 US_STATES_ID = {
@@ -246,17 +247,17 @@ def ensure_https(url):
 
 def parse_search_results(resp) -> Union[AvSearchResult, None]:
     resp.raise_for_status()
-    res = re.search(r"Найдено номеров.*?<b>([\d\s]+)", resp.text)
+    res = re.search(r"License plates found.*?<b>([\d\s\.]+)", resp.text)
     if not res:
         return None
-    total_results = int(res.group(1).replace(" ", ""))
+    total_results = int(res.group(1).replace(".", ""))
 
     doc = BeautifulSoup(resp.text, "html.parser")
     panels = doc.select(".content .panel-body")
 
     cars = []
     for panel in panels:
-        page_url = "https://avto-nomer.ru{}".format(panel.select("a")[0]["href"])
+        page_url = "{}{}".format(AN_BASE_URL, panel.select("a")[0]["href"])
         thumb_url = ensure_https(panel.select("img")[0]["src"])
         license_plate = panel.select("img")[1]["alt"]
         dt = parse(panel.select("small.pull-right")[0].text)
@@ -283,7 +284,7 @@ def search_ru(fastsearch=None, ctype=None, regions=None, tags=None) -> Union[AvS
         for i, tag in enumerate(tags):
             params[f"tags[{i}]"] = tag
     resp = scraper.get(
-        "http://avto-nomer.ru/ru/gallery.php",
+        f"{AN_BASE_URL}/ru/gallery.php",
         params=params,
     )
     return parse_search_results(resp)
@@ -291,7 +292,7 @@ def search_ru(fastsearch=None, ctype=None, regions=None, tags=None) -> Union[AvS
 
 def search_su(plate_number) -> Union[AvSearchResult, None]:
     resp = scraper.get(
-        "http://avto-nomer.ru/su/gallery.php",
+        f"{AN_BASE_URL}/su/gallery.php",
         params={
             "fastsearch": "{} {} {}".format(
                 plate_number[:1],
@@ -306,7 +307,7 @@ def search_su(plate_number) -> Union[AvSearchResult, None]:
 def get_series_ru_url(series_number):
     return Request(
         "GET",
-        "https://avto-nomer.ru/ru/gallery.php",
+        f"{AN_BASE_URL}/ru/gallery.php",
         params={
             "fastsearch": "{}*{}".format(
                 series_number[:1],
@@ -319,7 +320,7 @@ def get_series_ru_url(series_number):
 def get_series_us_url(region, ctype, series_number):
     return Request(
         "GET",
-        "https://avto-nomer.ru/us/gallery.php",
+        f"{AN_BASE_URL}/us/gallery.php",
         params={
             "gal": "us",
             "region": region,
@@ -331,7 +332,7 @@ def get_series_us_url(region, ctype, series_number):
 
 def get_series_us(region, ctype, series_number):
     resp = scraper.get(
-        "https://avto-nomer.ru/us/gallery.php",
+        f"{AN_BASE_URL}/us/gallery.php",
         params={
             "gal": "us",
             "region": region,
@@ -340,9 +341,9 @@ def get_series_us(region, ctype, series_number):
         },
     )
     resp.raise_for_status()
-    res = re.search(r"Найдено номеров.*?<b>([\d\s]+)", resp.text)
+    res = re.search(r"License plates found.*?<b>([\d\s\.]+)", resp.text)
     if res:
-        return int(res.group(1).replace(" ", ""))
+        return int(res.group(1).replace(".", ""))
 
 
 def load_photo(path):
