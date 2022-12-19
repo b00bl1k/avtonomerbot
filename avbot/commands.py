@@ -13,9 +13,10 @@ import tasks
 
 logger = logging.getLogger(__name__)
 
-INPUT_FORMATS = """• `а123аа777` — информация о номере РФ
+INPUT_FORMATS = """• `ru05` — информация о регионе РФ
+• `а123аа777` — информация о номере РФ
+• `аа12377` — информация о номере общественного транспорта РФ
 • `ааа777` — информация о серии РФ
-• `ru05` — информация о регионе РФ
 • `а0069МО` — информация о номере СССР"""
 HELP = f"Бот для поиска по сайту platesmania.com\n\nВведите:\n{INPUT_FORMATS}"
 
@@ -52,6 +53,11 @@ def on_search_query(update: Update, context: CallbackContext):
 
         if avtonomer.validate_ru_plate_number(ru_query):
             search_query = db.add_search_query(user, ru_query)
+            tasks.search_license_plate.delay(
+                chat_id, message_id, search_query.id, page=0, edit=False)
+        elif avtonomer.validate_ru_pt_plate_number(ru_query):
+            ru_query = avtonomer.reformat_ru_pt_query(ru_query)
+            search_query = db.add_search_query(user, ru_query, "ru-pt")
             tasks.search_license_plate.delay(
                 chat_id, message_id, search_query.id, page=0, edit=False)
         elif avtonomer.validate_su_plate_number(su_query):
