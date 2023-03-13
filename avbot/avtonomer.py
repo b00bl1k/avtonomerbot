@@ -14,6 +14,7 @@ scraper = cfscrape.create_scraper()
 logger = logging.getLogger(__name__)
 
 CTYPE_RU_CARS = 1
+CTYPE_RU_MOTORCYCLES = 4
 CTYPE_RU_PUBLIC_TRSNSPORT = 16
 TAG_NEW_LETTER_COMBINATION = 13
 AN_BASE_URL = "https://platesmania.com"
@@ -216,6 +217,10 @@ def validate_ru_plate_number(number):
 
 def validate_ru_pt_plate_number(number):
     res = re.match(r"^[abekmhopctyx]{2}\d{5}$", number)
+    return res
+
+def validate_ru_moto_plate_number(number):
+    res = re.match(r"^\d{4}[abekmhopctyx]{2}\d{2,3}$", number)
     return res
 
 def reformat_ru_pt_query(number):

@@ -75,6 +75,9 @@ def search_license_plate(self, chat_id, message_id, search_query_id, page, edit)
         elif lp_type == "ru-pt":
             result = avtonomer.search_ru(
                 lp_num, avtonomer.CTYPE_RU_PUBLIC_TRSNSPORT)
+        elif lp_type == "ru-moto":
+            result = avtonomer.search_ru(
+                lp_num, avtonomer.CTYPE_RU_MOTORCYCLES)
         elif lp_type == "su":
             result = avtonomer.search_su(lp_num)
 

@@ -13,12 +13,22 @@ import tasks
 
 logger = logging.getLogger(__name__)
 
-INPUT_FORMATS = """• `ru05` — информация о регионе РФ
-• `а123аа777` — информация о номере РФ
-• `аа12377` — информация о номере общественного транспорта РФ
-• `ааа777` — информация о серии РФ
-• `а0069МО` — информация о номере СССР"""
-HELP = f"Бот для поиска по сайту platesmania.com\n\nВведите:\n{INPUT_FORMATS}"
+INPUT_FORMATS = """РФ:
+• `ru05` — сведения о регионе
+• `а123аа777` — автомобильный номер
+• `аа12377` — номер общественного транспорта
+• `1234аа77` — мотоциклетный номер
+• `ааа777` — сведения о автомобильной серии
+
+СССР:
+• `а0069МО` — автомобильный номер
+
+USA:
+• `pa xxx` — сведения о серии штата Pennsylvania
+• `oh xxx` — сведения о серии штата Ohio
+• `nc xxx` — сведения о серии штата North Carolina
+• `ny xxx` — сведения о серии штата New York"""
+HELP = f"Бот для поиска по сайту platesmania.com\n\nДля получения информации введите:\n{INPUT_FORMATS}"
 
 
 def ensure_user_created(telegram_id, from_user):
@@ -58,6 +68,10 @@ def on_search_query(update: Update, context: CallbackContext):
         elif avtonomer.validate_ru_pt_plate_number(ru_query):
             ru_query = avtonomer.reformat_ru_pt_query(ru_query)
             search_query = db.add_search_query(user, ru_query, "ru-pt")
+            tasks.search_license_plate.delay(
+                chat_id, message_id, search_query.id, page=0, edit=False)
+        elif avtonomer.validate_ru_moto_plate_number(ru_query):
+            search_query = db.add_search_query(user, ru_query, "ru-moto")
             tasks.search_license_plate.delay(
                 chat_id, message_id, search_query.id, page=0, edit=False)
         elif avtonomer.validate_su_plate_number(su_query):

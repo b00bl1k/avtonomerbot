@@ -3,11 +3,24 @@ from unittest.mock import patch
 from avbot import avtonomer
 
 
-def test_validate_ru_license_plate():
+def test_validate_ru_cars_license_plate():
     assert avtonomer.validate_ru_plate_number("a123aa123")
     assert avtonomer.validate_ru_plate_number("a123aa12")
     assert not avtonomer.validate_ru_plate_number("a123aa1")
     assert not avtonomer.validate_ru_plate_number("aaa123")
+
+
+def test_validate_ru_pt_license_plates():
+    assert avtonomer.validate_ru_pt_plate_number("ax12377")
+    assert not avtonomer.validate_ru_pt_plate_number("ax123177")
+    assert not avtonomer.validate_ru_pt_plate_number("a12399")
+
+
+def test_validate_ru_moto_license_plates():
+    assert avtonomer.validate_ru_moto_plate_number("1234ax77")
+    assert avtonomer.validate_ru_moto_plate_number("1234ax177")
+    assert not avtonomer.validate_ru_moto_plate_number("123ax77")
+    assert not avtonomer.validate_ru_moto_plate_number("1234x77")
 
 
 def test_validate_su_license_plate():
