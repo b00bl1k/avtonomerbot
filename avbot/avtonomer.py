@@ -4,13 +4,12 @@ from dataclasses import dataclass
 from datetime import date
 from io import BytesIO
 from typing import List, Union
+import cloudscraper
 from requests import Request
-
-import cfscrape
 from bs4 import BeautifulSoup
 from dateutil.parser import parse
 
-scraper = cfscrape.create_scraper()
+scraper = cloudscraper.create_scraper()
 logger = logging.getLogger(__name__)
 
 CTYPE_RU_CARS = 1

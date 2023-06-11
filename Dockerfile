@@ -1,13 +1,13 @@
-FROM python:3.10
+FROM python:3.11
 
 RUN apt update \
     && apt install -y nodejs \
-    && pip install pipenv==2020.11.15 \
+    && pip install pipenv==2023.6.2 \
     && groupadd -r app \
     && useradd -r -g app app
 
 COPY Pipfile* /tmp/
-RUN cd /tmp && pipenv lock --requirements > requirements.txt \
+RUN cd /tmp && pipenv requirements > requirements.txt \
     && pip install -r /tmp/requirements.txt
 
 ADD avbot /app
