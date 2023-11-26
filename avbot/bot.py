@@ -19,8 +19,8 @@ def main():
             listen=settings.WEBHOOK_HOST,
             port=settings.WEBHOOK_PORT,
             url_path=settings.WEBHOOK_PATH,
+            webhook_url=settings.WEBHOOK_URL,
         )
-        updater.bot.set_webhook(settings.WEBHOOK_URL)
         logger.info("listen on {}:{}".format(
             settings.WEBHOOK_HOST, settings.WEBHOOK_PORT
         ))
