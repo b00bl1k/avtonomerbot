@@ -112,7 +112,7 @@ def on_search_paginate(update: Update, context: CallbackContext):
 
 
 def on_error(update: Update, context: CallbackContext):
-    logger.error(f"update cause error", exc_info=context.error, extra={
+    logger.error("update cause error", exc_info=context.error, extra={
         "update": update.to_dict() if update else None,
     })
 

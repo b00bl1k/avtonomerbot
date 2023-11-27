@@ -22,7 +22,7 @@ def get_car_caption(car, plate, page, count):
     date = car.date.strftime("%d.%m.%Y")
     plate = avtonomer.translate_to_cyrillic(plate)
     return (
-        f"{plate} [{page + 1}/{count}] {date}\n"
+        f"{plate} {date}\n"
         f"{car.make} {car.model}\n"
         f"{car.page_url}"
     )
@@ -142,7 +142,7 @@ def search_license_plate(self, chat_id, message_id, search_query_id, page, edit)
 def get_series_ru(self, chat_id, message_id, search_query_id):
     search_query = db.get_search_query(search_query_id)
     series_number = search_query.query_text
-    key = f"avtonomer.get_series_ru({series_number})"
+    key = f"avtonomer.get_series_ru2({series_number})"
 
     result = cache.get(key)
     if not result:
@@ -152,8 +152,6 @@ def get_series_ru(self, chat_id, message_id, search_query_id):
                 series_number[1:],
             ),
         )
-        if result is not None:
-            result = result.total_results
 
     if result is None:
         logger.warning(f"No data for query {series_number}")
@@ -167,11 +165,23 @@ def get_series_ru(self, chat_id, message_id, search_query_id):
 
     url = avtonomer.get_series_ru_url(series_number)
     series_number = avtonomer.translate_to_cyrillic(series_number)
-    message = (
-        f"В серии [{series_number}]({url}) пока нет ни одного номера"
-        if result == 0
-        else f"Количество фотографий в серии [{series_number}]({url}): {result}"
-    )
+    if result.total_results > 0:
+        cnt = result.total_results
+        message = f"Количество фотографий в серии [{series_number}]({url}): {cnt}"
+        message += "\n\nСвежие номера:\n"
+        message += "\n".join([
+            "• {} /{} — {} {}".format(
+                car.date,
+                avtonomer.translate_to_latin(
+                    car.license_plate.replace(" ", "")).upper(),
+                car.make,
+                car.model,
+            )
+            for car in result.cars
+        ])
+    else:
+        message = f"В серии [{series_number}]({url}) пока нет ни одного номера"
+
     bot.send_message(
         chat_id,
         message,
