@@ -8,6 +8,7 @@ DATABASE_URL = os.environ["DATABASE_URL"]
 CELERY_BROKER_URL = os.environ["CELERY_BROKER_URL"]
 SENTRY_DSN = os.environ.get("SENTRY_DSN")
 SENTRY_SAMPLE_RATE = float(os.environ.get("SENTRY_SAMPLE_RATE", 0.2))
+FWD_CHAT_ID = os.environ.get("FWD_CHAT_ID")
 WEBHOOK_URL = os.environ.get("WEBHOOK_URL")
 WEBHOOK_PATH = os.environ.get("WEBHOOK_PATH", "/")
 WEBHOOK_HOST = os.environ.get("WEBHOOK_HOST", "localhost")

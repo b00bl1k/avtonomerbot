@@ -9,6 +9,7 @@ from telegram.ext import (
 
 import avtonomer
 import db
+import settings
 import tasks
 
 logger = logging.getLogger(__name__)
@@ -88,6 +89,8 @@ def on_search_query(update: Update, context: CallbackContext):
             search_query = db.add_search_query(user, query)
             tasks.get_ru_region.delay(chat_id, message_id, search_query.id)
         else:
+            if settings.FWD_CHAT_ID:
+                update.message.forward(settings.FWD_CHAT_ID)
             update.message.reply_markdown(
                 f"Некорректный запрос. Введите:\n{INPUT_FORMATS}",
                 quote=True,
@@ -111,6 +114,15 @@ def on_search_paginate(update: Update, context: CallbackContext):
         chat_id, message_id, search_query.id, page=page, edit=True)
 
 
+def on_unsupported_msg(update: Update, context: CallbackContext):
+    if settings.FWD_CHAT_ID:
+        update.message.forward(settings.FWD_CHAT_ID)
+    update.message.reply_markdown(
+        f"Неподдерживаемый тип запроса. Введите:\n{INPUT_FORMATS}",
+        quote=True,
+    )
+
+
 def on_error(update: Update, context: CallbackContext):
     logger.error("update cause error", exc_info=context.error, extra={
         "update": update.to_dict() if update else None,
@@ -121,5 +133,6 @@ def register_commands(dispatcher):
     dispatcher.add_handler(CommandHandler("start", on_start_command))
     dispatcher.add_handler(CommandHandler("help", on_help_command))
     dispatcher.add_handler(MessageHandler(Filters.text, on_search_query))
+    dispatcher.add_handler(MessageHandler(Filters.update, on_unsupported_msg))
     dispatcher.add_handler(CallbackQueryHandler(on_search_paginate))
     dispatcher.add_error_handler(on_error)
