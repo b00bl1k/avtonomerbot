@@ -141,7 +141,7 @@ def on_reply_msg(update: Update, context: CallbackContext):
         original_message_id = REPLIES.pop(replied_id, None)
         if original_message_id:
             context.bot.send_message(
-                chat_id=update.message.reply_to_message.chat.id,
+                chat_id=update.message.reply_to_message.forward_from.id,
                 reply_to_message_id=original_message_id,
                 text=update.message.text,
             )
