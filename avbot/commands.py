@@ -31,6 +31,9 @@ USA:
 • `ny xxx` — сведения о серии штата New York"""
 HELP = f"Бот для поиска по сайту platesmania.com\n\nДля получения информации введите:\n{INPUT_FORMATS}"
 
+REPLIES = {}
+VIN_LENGTH = 17
+
 
 def ensure_user_created(telegram_id, from_user):
     return db.get_or_create_user(
@@ -89,12 +92,16 @@ def on_search_query(update: Update, context: CallbackContext):
             search_query = db.add_search_query(user, query)
             tasks.get_ru_region.delay(chat_id, message_id, search_query.id)
         else:
+            is_vin = (len(query) == VIN_LENGTH)
             if settings.FWD_CHAT_ID:
-                update.message.forward(settings.FWD_CHAT_ID)
-            update.message.reply_markdown(
-                f"Некорректный запрос. Введите:\n{INPUT_FORMATS}",
-                quote=True,
-            )
+                msg = update.message.forward(settings.FWD_CHAT_ID)
+                if is_vin:
+                    REPLIES.update({msg.message_id: update.message.message_id})
+            if not is_vin:
+                update.message.reply_markdown(
+                    f"Некорректный запрос. Введите:\n{INPUT_FORMATS}",
+                    quote=True,
+                )
 
 
 def on_search_paginate(update: Update, context: CallbackContext):
@@ -123,6 +130,27 @@ def on_unsupported_msg(update: Update, context: CallbackContext):
     )
 
 
+def on_reply_msg(update: Update, context: CallbackContext):
+    if not settings.FWD_CHAT_ID:
+        return
+    if update.message.chat.id != int(settings.FWD_CHAT_ID):
+        logger.warning("unknown replied user")
+        return
+    if update.message.reply_to_message:
+        replied_id = update.message.reply_to_message.message_id
+        original_message_id = REPLIES.pop(replied_id, None)
+        if original_message_id:
+            context.bot.send_message(
+                chat_id=update.message.reply_to_message.chat.id,
+                reply_to_message_id=original_message_id,
+                text=update.message.text,
+            )
+        else:
+            logger.warning("original message not found")
+    else:
+        logger.warning("no reply {}".format(update.message.reply_to_message))
+
+
 def on_error(update: Update, context: CallbackContext):
     logger.error("update cause error", exc_info=context.error, extra={
         "update": update.to_dict() if update else None,
@@ -132,6 +160,7 @@ def on_error(update: Update, context: CallbackContext):
 def register_commands(dispatcher):
     dispatcher.add_handler(CommandHandler("start", on_start_command))
     dispatcher.add_handler(CommandHandler("help", on_help_command))
+    dispatcher.add_handler(MessageHandler(Filters.reply, on_reply_msg))
     dispatcher.add_handler(MessageHandler(Filters.text, on_search_query))
     dispatcher.add_handler(MessageHandler(Filters.update, on_unsupported_msg))
     dispatcher.add_handler(CallbackQueryHandler(on_search_paginate))
