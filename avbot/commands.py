@@ -11,6 +11,7 @@ import avtonomer
 import db
 import settings
 import tasks
+from i18n import setup_locale, _, __
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +30,12 @@ USA:
 • `oh xxx` — сведения о серии штата Ohio
 • `nc xxx` — сведения о серии штата North Carolina
 • `ny xxx` — сведения о серии штата New York"""
-HELP = f"Бот для поиска по сайту platesmania.com\n\nДля получения информации введите:\n{INPUT_FORMATS}"
+
+HELP = __("""Bot for searching on the platesmania.com website
+
+Please input one of the following commands:
+
+{info}""")
 
 REPLIES = {}
 VIN_LENGTH = 17
@@ -45,11 +51,11 @@ def ensure_user_created(telegram_id, from_user):
 def on_start_command(update: Update, context: CallbackContext):
     telegram_id = update.message.chat.id
     ensure_user_created(telegram_id, update.message.from_user)
-    update.message.reply_markdown(HELP,)
+    update.message.reply_markdown(HELP.format(info=INPUT_FORMATS),)
 
 
 def on_help_command(update: Update, context: CallbackContext):
-    update.message.reply_markdown(HELP)
+    update.message.reply_markdown(HELP.format(info=INPUT_FORMATS))
 
 
 def on_search_query(update: Update, context: CallbackContext):
@@ -157,11 +163,17 @@ def on_error(update: Update, context: CallbackContext):
     })
 
 
+def on_preprocess_update(update: Update, context: CallbackContext):
+    # TODO obtain lang code from update or db
+    setup_locale("ru")
+
+
 def register_commands(dispatcher):
-    dispatcher.add_handler(CommandHandler("start", on_start_command))
-    dispatcher.add_handler(CommandHandler("help", on_help_command))
-    dispatcher.add_handler(MessageHandler(Filters.reply, on_reply_msg))
-    dispatcher.add_handler(MessageHandler(Filters.text, on_search_query))
-    dispatcher.add_handler(MessageHandler(Filters.update, on_unsupported_msg))
-    dispatcher.add_handler(CallbackQueryHandler(on_search_paginate))
+    dispatcher.add_handler(MessageHandler(Filters.update, on_preprocess_update))
+    dispatcher.add_handler(CommandHandler("start", on_start_command), 1)
+    dispatcher.add_handler(CommandHandler("help", on_help_command), 1)
+    dispatcher.add_handler(MessageHandler(Filters.reply, on_reply_msg), 1)
+    dispatcher.add_handler(MessageHandler(Filters.text, on_search_query), 1)
+    dispatcher.add_handler(MessageHandler(Filters.update, on_unsupported_msg), 1)
+    dispatcher.add_handler(CallbackQueryHandler(on_search_paginate), 1)
     dispatcher.add_error_handler(on_error)

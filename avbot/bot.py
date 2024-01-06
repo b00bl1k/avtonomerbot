@@ -2,6 +2,7 @@ import logging
 from telegram.ext import Updater
 
 import settings
+import i18n
 from commands import register_commands
 
 logger = logging.getLogger(__name__)
@@ -13,6 +14,7 @@ updater = Updater(
 
 
 def main():
+    i18n.load_translations("locale")
     register_commands(updater.dispatcher)
     if settings.WEBHOOK_URL:
         updater.start_webhook(

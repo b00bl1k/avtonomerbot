@@ -18,6 +18,7 @@ celery = {extras = ["redis"], version = "==5.*"}
 beautifulsoup4 = "==4.*"
 python-dateutil = "==2.*"
 cloudscraper = "*"
+babel = "*"
 
 [requires]
 python_version = "3.11"
