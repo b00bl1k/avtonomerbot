@@ -15,7 +15,7 @@ def gettext_translate(s):
 
 
 def lazy_gettext(s):
-    return LazyProxy(gettext_translate, s=s)
+    return LazyProxy(gettext_translate, s=s, enable_cache=False)
 
 
 _ = gettext_translate
@@ -43,3 +43,8 @@ def load_translations(path, domain="avbot"):
 
 def setup_locale(lang="en"):
     tls.translate = gettext_getfunc(lang)
+    tls.lang = lang
+
+
+def get_current_lang():
+    return tls.lang

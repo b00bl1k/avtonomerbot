@@ -1,6 +1,8 @@
 import logging
 import os
 
+import i18n
+
 BOT_TOKEN = os.environ["BOT_TOKEN"]
 AN_KEY = os.environ["AN_KEY"]
 REDIS_CACHE_URL = os.environ["REDIS_CACHE_URL"]
@@ -17,6 +19,8 @@ LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
 PROXY_URL = os.environ.get("PROXY_URL")
 PROXY_USERNAME = os.environ.get("PROXY_USERNAME")
 PROXY_PASSWORD = os.environ.get("PROXY_PASSWORD")
+LOCALE_PATH = "locale"
+
 REQUEST_KWARGS = (
     {
         "proxy_url": PROXY_URL,
@@ -34,6 +38,8 @@ logging.basicConfig(
     format="%(levelname)s %(asctime)s %(name)s: %(message)s",
     datefmt="%d-%m-%Y %H:%M:%S"
 )
+
+i18n.load_translations(LOCALE_PATH)
 
 if SENTRY_DSN:
     import sentry_sdk

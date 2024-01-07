@@ -1,5 +1,6 @@
 import logging
 from datetime import timedelta
+from functools import wraps
 
 import telegram
 from celery import Celery, Task
@@ -9,6 +10,7 @@ import avtonomer
 import cache
 import db
 import settings
+from i18n import setup_locale, _
 
 PHOTO_NOT_FOUND = "assets/not-found.png"
 TASKS_TIME_LIMIT = 15
@@ -16,6 +18,14 @@ TASKS_TIME_LIMIT = 15
 app = Celery("avbot", broker=settings.CELERY_BROKER_URL)
 bot = telegram.Bot(token=settings.BOT_TOKEN)
 logger = logging.getLogger(__name__)
+
+
+def use_translation(fun):
+    @wraps(fun)
+    def _inner(*args, **kwargs):
+        setup_locale(kwargs.pop("language", None))
+        return fun(*args, **kwargs)
+    return _inner
 
 
 def get_car_caption(car, plate, page, count):
@@ -49,7 +59,7 @@ class TelegramTask(Task):
     def on_failure(self, exc, task_id, args, kwargs, einfo):
         bot.send_message(
             args[0],
-            "Произошла ошибка во время обработки запроса.",
+            "Error has occurred, try again later / Произошла ошибка, попробуйте ещё раз",
             reply_to_message_id=args[1],
         )
 
@@ -62,6 +72,7 @@ class TelegramTask(Task):
     default_retry_delay=2,
     soft_time_limit=TASKS_TIME_LIMIT,
 )
+@use_translation
 def search_license_plate(self, chat_id, message_id, search_query_id, page, edit):
     search_query = db.get_search_query(search_query_id)
     lp_num = search_query.query_text
@@ -84,14 +95,14 @@ def search_license_plate(self, chat_id, message_id, search_query_id, page, edit)
     if result is None:
         logger.warning(f"No data for query {lp_num} {lp_type}")
         bot.send_message(
-            chat_id, "Нет данных",
+            chat_id, _("No data"),
             reply_to_message_id=message_id,
         )
         return
 
     if not result.total_results:
         bot.send_message(
-            chat_id, "По вашему запросу ничего не найдено",
+            chat_id, _("Nothing found"),
             reply_to_message_id=message_id,
         )
         return
@@ -139,6 +150,7 @@ def search_license_plate(self, chat_id, message_id, search_query_id, page, edit)
     default_retry_delay=2,
     soft_time_limit=TASKS_TIME_LIMIT,
 )
+@use_translation
 def get_series_ru(self, chat_id, message_id, search_query_id):
     search_query = db.get_search_query(search_query_id)
     series_number = search_query.query_text
@@ -156,7 +168,7 @@ def get_series_ru(self, chat_id, message_id, search_query_id):
     if result is None:
         logger.warning(f"No data for query {series_number}")
         bot.send_message(
-            chat_id, "Нет данных",
+            chat_id, _("No data"),
             reply_to_message_id=message_id,
         )
         return
@@ -167,8 +179,12 @@ def get_series_ru(self, chat_id, message_id, search_query_id):
     series_number = avtonomer.translate_to_cyrillic(series_number)
     if result.total_results > 0:
         cnt = result.total_results
-        message = f"Количество фотографий в серии [{series_number}]({url}): {cnt}"
-        message += "\n\nСвежие номера:\n"
+        message = _("Pictures in the series [{series_number}]({url}): {cnt}").format(
+            series_number=series_number,
+            url=url,
+            cnt=cnt,
+        )
+        message += "\n\n" + _("Latest plates:") + "\n"
         message += "\n".join([
             "• {} /{} — {} {}".format(
                 car.date,
@@ -180,7 +196,10 @@ def get_series_ru(self, chat_id, message_id, search_query_id):
             for car in result.cars
         ])
     else:
-        message = f"В серии [{series_number}]({url}) пока нет ни одного номера"
+        message = _("No plates in the series [{series_number}]({url}) yet").format(
+            series_number=series_number,
+            url=url,
+        )
 
     bot.send_message(
         chat_id,
@@ -198,6 +217,7 @@ def get_series_ru(self, chat_id, message_id, search_query_id):
     default_retry_delay=2,
     soft_time_limit=TASKS_TIME_LIMIT,
 )
+@use_translation
 def get_series_us(self, chat_id, message_id, search_query_id):
     search_query = db.get_search_query(search_query_id)
     result = avtonomer.validate_us_plate_series(search_query.query_text)
@@ -212,7 +232,7 @@ def get_series_us(self, chat_id, message_id, search_query_id):
     if result is None:
         logger.warning(f"Not data for query {series_number}")
         bot.send_message(
-            chat_id, "Нет данных",
+            chat_id, _("No data"),
             reply_to_message_id=message_id,
         )
         return
@@ -221,9 +241,15 @@ def get_series_us(self, chat_id, message_id, search_query_id):
 
     url = avtonomer.get_series_us_url(state_id, ctype_id, series_number)
     message = (
-        f"В серии [{series_number}]({url}) штата `{state}` пока нет ни одного номера"
+        _("There are no plates in the series [{series_number}]({url}) of the state `{state}`")
+        .format(series_number=series_number, url=url, state=state)
         if result == 0
-        else f"Количество фотографий в серии [{series_number}]({url}) штата `{state}`: {result}"
+        else _("Pictures in the series [{series_number}]({url}) of the state `{state}`: {result}").format(
+            series_number=series_number,
+            url=url,
+            state=state,
+            result=result,
+        )
     )
     bot.send_message(
         chat_id,
@@ -241,6 +267,7 @@ def get_series_us(self, chat_id, message_id, search_query_id):
     default_retry_delay=2,
     soft_time_limit=TASKS_TIME_LIMIT,
 )
+@use_translation
 def get_ru_region(self, chat_id, message_id, search_query_id):
     search_query = db.get_search_query(search_query_id)
     result = avtonomer.validate_ru_region(search_query.query_text)
@@ -258,9 +285,10 @@ def get_ru_region(self, chat_id, message_id, search_query_id):
 
     cache.add(key, result, timedelta(minutes=5))
 
-    message = f"Регион *{region}* — {region_name}"
+    message = _("Region *{region}* — {region_name}").format(
+        region=region, region_name=region_name)
     if result is not None and result.total_results > 0:
-        message += "\n\nСвежие серии:\n"
+        message += "\n\n" + _("Latest series:") + "\n"
         message += "\n".join([
             "• {} /{} — {} {}".format(
                 car.date,

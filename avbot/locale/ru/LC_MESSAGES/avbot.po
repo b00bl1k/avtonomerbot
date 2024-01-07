@@ -7,10 +7,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-01-06 23:50+0500\n"
-"PO-Revision-Date: 2024-01-06 23:51+0500\n"
+"POT-Creation-Date: 2024-01-07 13:32+0500\n"
+"PO-Revision-Date: 2024-01-07 13:33+0500\n"
 "Last-Translator: Alexey <alex@b00bl1k.ru>\n"
-"Language-Team: \n"
+"Language-Team: Русский\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -20,7 +20,41 @@ msgstr ""
 "Generated-By: Babel 2.14.0\n"
 "X-Generator: Poedit 3.3.2\n"
 
-#: avbot/commands.py:34
+#: avbot/commands.py:20
+msgid ""
+"Russia:\n"
+"• `ru05` — info about region\n"
+"• `а123аа777` — vehicle plate\n"
+"• `аа12377` — public transport plate\n"
+"• `1234аа77` — motorcycle plate\n"
+"• `ааа777` — info about vehicle plate series\n"
+"\n"
+"Soviet Union:\n"
+"• `а0069МО` — private vehicles\n"
+"\n"
+"United States:\n"
+"• `pa xxx` — info about Pennsylvania state plate series\n"
+"• `oh xxx` — info about Ohio state plate series\n"
+"• `nc xxx` — info about North Carolina state plate series\n"
+"• `ny xxx` — info about New York state plate series"
+msgstr ""
+"Россия:\n"
+"• `ru05` — сведения о регионе\n"
+"• `а123аа777` — автомобильный номер\n"
+"• `аа12377` — номер общественного транспорта\n"
+"• `1234аа77` — мотоциклетный номер\n"
+"• `ааа777` — сведения о автомобильной серии\n"
+"\n"
+"СССР:\n"
+"• `а0069МО` — автомобильный номер\n"
+"\n"
+"USA:\n"
+"• `pa xxx` — сведения о серии штата Pennsylvania\n"
+"• `oh xxx` — сведения о серии штата Ohio\n"
+"• `nc xxx` — сведения о серии штата North Carolina\n"
+"• `ny xxx` — сведения о серии штата New York"
+
+#: avbot/commands.py:36
 msgid ""
 "Bot for searching on the platesmania.com website\n"
 "\n"
@@ -33,3 +67,67 @@ msgstr ""
 "Введите одну из следующих команд:\n"
 "\n"
 "{info}"
+
+#: avbot/commands.py:88
+msgid "Current language: {}"
+msgstr "Текущий язык: {}"
+
+#: avbot/commands.py:153
+msgid ""
+"Invalid request. Please input:\n"
+"{}"
+msgstr ""
+"Некорректный запрос, пожалуйста введите:\n"
+"{}"
+
+#: avbot/commands.py:175
+msgid "Something went wrong, please try again."
+msgstr "Произошла ошибка, попробуйте ещё раз."
+
+#: avbot/commands.py:192
+msgid ""
+"Unsupported request. Please input:\n"
+"{}"
+msgstr ""
+"Неподдерживаемый запрос, пожалуйста введите:\n"
+"{}"
+
+#: avbot/tasks.py:98 avbot/tasks.py:171 avbot/tasks.py:235
+msgid "No data"
+msgstr "Нет данных"
+
+#: avbot/tasks.py:105
+msgid "Nothing found"
+msgstr "Ничего не найдено"
+
+#: avbot/tasks.py:182
+msgid "Pictures in the series [{series_number}]({url}): {cnt}"
+msgstr "Фотографий в серии [{series_number}]({url}): {cnt}"
+
+#: avbot/tasks.py:187
+msgid "Latest plates:"
+msgstr "Последние номера:"
+
+#: avbot/tasks.py:199
+msgid "No plates in the series [{series_number}]({url}) yet"
+msgstr "В серии [{series_number}]({url}) ещё нет номеров"
+
+#: avbot/tasks.py:244
+msgid ""
+"There are no plates in the series [{series_number}]({url}) of the state "
+"`{state}`"
+msgstr "В серии [{series_number}]({url}) штата `{state}` ещё нет номеров"
+
+#: avbot/tasks.py:247
+msgid ""
+"Pictures in the series [{series_number}]({url}) of the state `{state}`: "
+"{result}"
+msgstr "Фотографий в серии [{series_number}]({url}) штата `{state}`: {result}"
+
+#: avbot/tasks.py:288
+msgid "Region *{region}* — {region_name}"
+msgstr "Регион *{region}* — {region_name}"
+
+#: avbot/tasks.py:291
+msgid "Latest series:"
+msgstr "Свежие серии:"

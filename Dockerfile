@@ -12,5 +12,7 @@ RUN cd /tmp && pipenv requirements > requirements.txt \
 
 ADD avbot /app
 WORKDIR /app
+RUN pybabel compile -d locale -D avbot
+
 USER app
 CMD ["./start.sh"]
