@@ -9,7 +9,7 @@ services:
       - db
   celery_worker:
     <<: *avbot
-    command: celery -A tasks worker -l info
+    command: celery -A avbot.tasks worker -l info
   redis:
     image: "redis:alpine"
   db:

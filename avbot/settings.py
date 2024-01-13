@@ -1,7 +1,7 @@
 import logging
 import os
 
-import i18n
+from avbot import i18n
 
 BOT_TOKEN = os.environ["BOT_TOKEN"]
 AN_KEY = os.environ["AN_KEY"]
@@ -19,7 +19,7 @@ LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
 PROXY_URL = os.environ.get("PROXY_URL")
 PROXY_USERNAME = os.environ.get("PROXY_USERNAME")
 PROXY_PASSWORD = os.environ.get("PROXY_PASSWORD")
-LOCALE_PATH = "locale"
+LOCALE_PATH = "avbot/locale"
 
 REQUEST_KWARGS = (
     {

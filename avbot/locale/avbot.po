@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-01-07 13:32+0500\n"
+"POT-Creation-Date: 2024-01-13 22:30+0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,91 +17,132 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.14.0\n"
 
-#: avbot/commands.py:20
+#: avbot/commands.py:21
 msgid ""
-"Russia:\n"
-"• `ru05` — info about region\n"
-"• `а123аа777` — vehicle plate\n"
-"• `аа12377` — public transport plate\n"
-"• `1234аа77` — motorcycle plate\n"
-"• `ааа777` — info about vehicle plate series\n"
+"Welcome to @avtonomerbot\n"
 "\n"
-"Soviet Union:\n"
-"• `а0069МО` — private vehicles\n"
-"\n"
-"United States:\n"
-"• `pa xxx` — info about Pennsylvania state plate series\n"
-"• `oh xxx` — info about Ohio state plate series\n"
-"• `nc xxx` — info about North Carolina state plate series\n"
-"• `ny xxx` — info about New York state plate series"
+"Input /help for the detailed information.\n"
+"Type /setlang to change language."
 msgstr ""
 
-#: avbot/commands.py:36
+#: avbot/commands.py:26
 msgid ""
 "Bot for searching on the platesmania.com website\n"
 "\n"
 "Please input one of the following commands:\n"
-"\n"
-"{info}"
 msgstr ""
 
-#: avbot/commands.py:88
+#: avbot/commands.py:83
 msgid "Current language: {}"
 msgstr ""
 
-#: avbot/commands.py:153
-msgid ""
-"Invalid request. Please input:\n"
-"{}"
+#: avbot/commands.py:102
+msgid "Choose country:"
 msgstr ""
 
-#: avbot/commands.py:175
+#: avbot/commands.py:114
+msgid "Current country: {}"
+msgstr ""
+
+#: avbot/commands.py:147
+msgid "Invalid request"
+msgstr ""
+
+#: avbot/commands.py:177 avbot/commands.py:187
+msgid ""
+"Request: {}\n"
+"Specify type of the plate:"
+msgstr ""
+
+#: avbot/commands.py:225
 msgid "Something went wrong, please try again."
 msgstr ""
 
-#: avbot/commands.py:192
-msgid ""
-"Unsupported request. Please input:\n"
-"{}"
+#: avbot/commands.py:242
+msgid "Unsupported request. Use /help"
 msgstr ""
 
-#: avbot/tasks.py:98 avbot/tasks.py:171 avbot/tasks.py:235
+#: avbot/cmd/base.py:4 avbot/models.py:20
+msgid "Russia"
+msgstr ""
+
+#: avbot/cmd/base.py:5 avbot/models.py:21
+msgid "Soviet Union"
+msgstr ""
+
+#: avbot/cmd/base.py:6 avbot/models.py:22
+msgid "United States"
+msgstr ""
+
+#: avbot/cmd/base.py:26
 msgid "No data"
 msgstr ""
 
-#: avbot/tasks.py:105
+#: avbot/cmd/base.py:30
 msgid "Nothing found"
 msgstr ""
 
-#: avbot/tasks.py:182
-msgid "Pictures in the series [{series_number}]({url}): {cnt}"
+#: avbot/cmd/ru.py:13
+msgid "vehicle plate 🚗"
 msgstr ""
 
-#: avbot/tasks.py:187
-msgid "Latest plates:"
+#: avbot/cmd/ru.py:34
+msgid "public transport plate 🚌"
 msgstr ""
 
-#: avbot/tasks.py:199
-msgid "No plates in the series [{series_number}]({url}) yet"
+#: avbot/cmd/ru.py:55
+msgid "special vehicle plate 🚜"
 msgstr ""
 
-#: avbot/tasks.py:244
-msgid ""
-"There are no plates in the series [{series_number}]({url}) of the state "
-"`{state}`"
+#: avbot/cmd/ru.py:76
+msgid "motorcycle plate 🏍"
 msgstr ""
 
-#: avbot/tasks.py:247
-msgid ""
-"Pictures in the series [{series_number}]({url}) of the state `{state}`: "
-"{result}"
+#: avbot/cmd/ru.py:97
+msgid "police vehicles plate 🚓"
 msgstr ""
 
-#: avbot/tasks.py:288
+#: avbot/cmd/ru.py:118
+msgid "info about region"
+msgstr ""
+
+#: avbot/cmd/ru.py:142
 msgid "Region *{region}* — {region_name}"
 msgstr ""
 
-#: avbot/tasks.py:291
+#: avbot/cmd/ru.py:150
 msgid "Latest series:"
+msgstr ""
+
+#: avbot/cmd/ru.py:168
+msgid "info about vehicle plate series"
+msgstr ""
+
+#: avbot/cmd/ru.py:197
+msgid "No plates in the series [{series_number}]({url}) yet"
+msgstr ""
+
+#: avbot/cmd/ru.py:207
+msgid "Pictures in the series [{series_number}]({url}): {cnt}"
+msgstr ""
+
+#: avbot/cmd/ru.py:209
+msgid "Latest plates:"
+msgstr ""
+
+#: avbot/cmd/su.py:12
+msgid "private vehicles (1980) 🚗"
+msgstr ""
+
+#: avbot/cmd/us.py:13
+msgid "info about state plate series (possible states: pa, oh, nc, ny)"
+msgstr ""
+
+#: avbot/cmd/us.py:42
+msgid "There are no plates in the series [{series}]({url}) of the state `{state}`"
+msgstr ""
+
+#: avbot/cmd/us.py:52
+msgid "Pictures in the series [{series}]({url}) of the state `{state}`: {cnt}"
 msgstr ""
 

@@ -9,35 +9,24 @@ from telegram.ext import (
     CallbackContext, CommandHandler, Filters, MessageHandler,
     CallbackQueryHandler)
 
-import avtonomer
-import db
-import settings
-import tasks
-from i18n import translations, get_current_lang, setup_locale, _, __
+from avbot import db
+from avbot import models
+from avbot import settings
+from avbot import tasks
+from avbot.i18n import translations, get_current_lang, setup_locale, _, __
+from avbot.plate_formats import PLATE_FORMATS, get_plate_format_by_type
 
 logger = logging.getLogger(__name__)
 
-INPUT_FORMATS = __("""Russia:
-• `ru05` — info about region
-• `а123аа777` — vehicle plate
-• `аа12377` — public transport plate
-• `1234аа77` — motorcycle plate
-• `ааа777` — info about vehicle plate series
+INTRO = __("""Welcome to @avtonomerbot
 
-Soviet Union:
-• `а0069МО` — private vehicles
-
-United States:
-• `pa xxx` — info about Pennsylvania state plate series
-• `oh xxx` — info about Ohio state plate series
-• `nc xxx` — info about North Carolina state plate series
-• `ny xxx` — info about New York state plate series""")
+Input /help for the detailed information.
+Type /setlang to change language.""")
 
 HELP = __("""Bot for searching on the platesmania.com website
 
 Please input one of the following commands:
-
-{info}""")
+""")
 
 REPLIES = {}
 VIN_LENGTH = 17
@@ -51,13 +40,20 @@ def ensure_user_created(telegram_id, from_user):
 
 
 def on_start_command(update: Update, context: CallbackContext):
-    telegram_id = update.message.chat.id
-    ensure_user_created(telegram_id, update.message.from_user)
-    update.message.reply_markdown(HELP.format(info=INPUT_FORMATS))
+    update.message.reply_markdown(str(INTRO))
 
 
 def on_help_command(update: Update, context: CallbackContext):
-    update.message.reply_markdown(HELP.format(info=INPUT_FORMATS))
+    message = [str(HELP)]
+    for country_code, plates in PLATE_FORMATS.items():
+        message.append("*{}*".format(models.COUNTRY_LABELS[country_code]))
+        for plate in plates:
+            message.append("• `{}` — {}".format(
+                plate.example,
+                plate.description,
+            ))
+        message.append("")
+    update.message.reply_markdown("\n".join(message))
 
 
 def on_setlang_command(update: Update, context: CallbackContext):
@@ -77,8 +73,7 @@ def on_setlang_command(update: Update, context: CallbackContext):
     )
 
 
-def on_setlang_query(update: Update, context: CallbackContext):
-    command, lang = update.callback_query.data.split("-")
+def on_setlang_query(update: Update, context: CallbackContext, lang: str):
     user = context.user_data.get("user")
     if lang in translations:
         user.language_code = lang
@@ -92,74 +87,129 @@ def on_setlang_query(update: Update, context: CallbackContext):
     )
 
 
+def on_setcountry_command(update: Update, context: CallbackContext):
+    buttons = [
+        [
+            InlineKeyboardButton(
+                str(label),
+                callback_data=f"setcountry-{code}",
+            )
+        ]
+        for code, label in models.COUNTRY_LABELS.items()
+    ]
+    markup = InlineKeyboardMarkup(buttons)
+    update.message.reply_text(
+        _("Choose country:"),
+        reply_markup=markup,
+    )
+
+
+def on_setcountry_query(update: Update, context: CallbackContext, arg: str):
+    country = int(arg)
+    user = context.user_data.get("user")
+    if country in models.COUNTRY_LABELS:
+        user.country = country
+        db.session.commit()
+    update.callback_query.message.edit_text(
+        _("Current country: {}").format(
+            models.COUNTRY_LABELS[country]
+        ),
+        reply_markup=None,
+    )
+
+
 def on_search_query(update: Update, context: CallbackContext):
-    if update.message:
-        context.bot.send_chat_action(update.effective_user.id, ChatAction.TYPING)
-        chat_id = update.message.chat.id
-        message_id = update.message.message_id
-        user = ensure_user_created(chat_id, update.message.from_user)
-        query = update.message.text
-        if query.startswith("/"):  # handle like normal request
-            query = query[1:]
+    chat_id = update.message.chat.id
+    message_id = update.message.message_id
+    user = context.user_data.get("user")
+    query = update.message.text
+    if query.startswith("/"):  # handle like normal request
+        query = query[1:]
 
-        ru_query = avtonomer.translate_to_latin(query)
-        su_query = avtonomer.translate_to_cyr(query)
-        lang = get_current_lang()
+    found = []
+    for country_code, plates in PLATE_FORMATS.items():
+        for plate in plates:
+            validated = plate.validate(query)
+            if validated:
+                found.append((validated, country_code, plate))
 
-        if avtonomer.validate_ru_plate_number(ru_query):
-            search_query = db.add_search_query(user, ru_query)
-            tasks.search_license_plate.delay(
-                chat_id, message_id, search_query.id, page=0, edit=False,
-                language=lang)
-        elif avtonomer.validate_ru_pt_plate_number(ru_query):
-            ru_query = avtonomer.reformat_ru_pt_query(ru_query)
-            search_query = db.add_search_query(user, ru_query, "ru-pt")
-            tasks.search_license_plate.delay(
-                chat_id, message_id, search_query.id, page=0, edit=False,
-                language=lang)
-        elif avtonomer.validate_ru_moto_plate_number(ru_query):
-            search_query = db.add_search_query(user, ru_query, "ru-moto")
-            tasks.search_license_plate.delay(
-                chat_id, message_id, search_query.id, page=0, edit=False,
-                language=lang)
-        elif avtonomer.validate_su_plate_number(su_query):
-            search_query = db.add_search_query(user, su_query, "su")
-            tasks.search_license_plate.delay(
-                chat_id, message_id, search_query.id, page=0, edit=False,
-                language=lang)
-        elif avtonomer.validate_ru_plate_series(ru_query):
-            search_query = db.add_search_query(user, ru_query)
-            tasks.get_series_ru.delay(
-                chat_id, message_id, search_query.id,
-                language=lang)
-        elif avtonomer.validate_us_plate_series(query):
-            search_query = db.add_search_query(user, query, "us")
-            tasks.get_series_us.delay(
-                chat_id, message_id, search_query.id,
-                language=lang)
-        elif avtonomer.validate_ru_region(query):
-            search_query = db.add_search_query(user, query)
-            tasks.get_ru_region.delay(
-                chat_id, message_id, search_query.id,
-                language=lang)
-        else:
-            is_vin = (len(query) == VIN_LENGTH)
-            if settings.FWD_CHAT_ID:
-                msg = update.message.forward(settings.FWD_CHAT_ID)
-                if is_vin:
-                    REPLIES.update({msg.message_id: update.message.message_id})
-            if not is_vin:
-                update.message.reply_markdown(
-                    _("Invalid request. Please input:\n{}")
-                    .format(INPUT_FORMATS),
-                    quote=True,
+    found_count = len(found)
+    # TODO reduce results using user.counrtry_code
+
+    if found_count == 0:
+        is_vin = (len(query) == VIN_LENGTH)
+        if settings.FWD_CHAT_ID:
+            msg = update.message.forward(settings.FWD_CHAT_ID)
+            if is_vin:
+                REPLIES.update({msg.message_id: update.message.message_id})
+        if not is_vin:
+            update.message.reply_text(
+                _("Invalid request"),
+                quote=True,
+            )
+    elif found_count == 1:
+        (validated_query, country_code, plate) = found[0]
+        search_query = db.add_search_query(
+            user, validated_query, plate.num_type)
+        plate.task.delay(
+            chat_id, message_id, search_query.id,
+            language=get_current_lang())
+        context.bot.send_chat_action(
+            update.effective_user.id, ChatAction.TYPING)
+    else:
+        buttons = [
+            [
+                InlineKeyboardButton(
+                    "{} - {}".format(
+                        models.COUNTRY_LABELS[country_code],
+                        plate.description,
+                    ),
+                    callback_data="specifyplate-{}/{}".format(
+                        plate.num_type,
+                        validated_query.encode("utf-8").hex(),
+                    ),
                 )
+            ]
+            for validated_query, country_code, plate in found
+        ]
+        markup = InlineKeyboardMarkup(buttons)
+        update.message.reply_text(
+            _("Request: {}\nSpecify type of the plate:").format(query),
+            reply_markup=markup,
+        )
+
+
+def on_specifyplate_query(update: Update, context: CallbackContext, arg: str):
+    num_type, query = arg.split("/")
+    validated_query = bytes.fromhex(query).decode("utf-8")
+    plate = get_plate_format_by_type(num_type)
+    user = context.user_data.get("user")
+    new_message = _("Request: {}\nSpecify type of the plate:").format(
+        validated_query,
+    )
+    update.callback_query.message.edit_text(
+        "{} {}".format(new_message, plate.description),
+        reply_markup=None,
+    )
+    search_query = db.add_search_query(
+        user, validated_query, plate.num_type)
+    chat_id = update.callback_query.message.chat_id
+    message_id = update.callback_query.message.message_id
+    plate.task.delay(
+        chat_id, message_id, search_query.id,
+        language=get_current_lang())
+    context.bot.send_chat_action(
+        update.effective_user.id, ChatAction.TYPING)
 
 
 def on_query_callback(update: Update, context: CallbackContext):
-    command, arg = update.callback_query.data.split("-")
+    command, arg = update.callback_query.data.split("-", maxsplit=1)
     if command == "setlang":
-        on_setlang_query(update, context)
+        on_setlang_query(update, context, arg)
+    elif command == "setcountry":
+        on_setcountry_query(update, context, arg)
+    elif command == "specifyplate":
+        on_specifyplate_query(update, context, arg)
     else:
         on_search_paginate(update, context)
 
@@ -189,8 +239,7 @@ def on_unsupported_msg(update: Update, context: CallbackContext):
     if settings.FWD_CHAT_ID:
         update.message.forward(settings.FWD_CHAT_ID)
     update.message.reply_markdown(
-        _("Unsupported request. Please input:\n{}")
-        .format(INPUT_FORMATS),
+        _("Unsupported request. Use /help"),
         quote=True,
     )
 
@@ -240,13 +289,14 @@ def on_preprocess_update(update: Update, context: CallbackContext):
     setup_locale(lang)
 
 
-def register_commands(dispatcher):
-    dispatcher.add_handler(MessageHandler(Filters.update, on_preprocess_update))
-    dispatcher.add_handler(CommandHandler("start", on_start_command), 1)
-    dispatcher.add_handler(CommandHandler("help", on_help_command), 1)
-    dispatcher.add_handler(CommandHandler("setlang", on_setlang_command), 1)
-    dispatcher.add_handler(MessageHandler(Filters.reply, on_reply_msg), 1)
-    dispatcher.add_handler(MessageHandler(Filters.text, on_search_query), 1)
-    dispatcher.add_handler(MessageHandler(Filters.update, on_unsupported_msg), 1)
-    dispatcher.add_handler(CallbackQueryHandler(on_query_callback), 1)
-    dispatcher.add_error_handler(on_error)
+def register_commands(dp):
+    dp.add_handler(MessageHandler(Filters.update, on_preprocess_update))
+    dp.add_handler(CommandHandler("start", on_start_command), 1)
+    dp.add_handler(CommandHandler("help", on_help_command), 1)
+    dp.add_handler(CommandHandler("setlang", on_setlang_command), 1)
+    dp.add_handler(CommandHandler("setcountry", on_setcountry_command), 1)
+    dp.add_handler(MessageHandler(Filters.reply, on_reply_msg), 1)
+    dp.add_handler(MessageHandler(Filters.text, on_search_query), 1)
+    dp.add_handler(MessageHandler(Filters.update, on_unsupported_msg), 1)
+    dp.add_handler(CallbackQueryHandler(on_query_callback), 1)
+    dp.add_error_handler(on_error)

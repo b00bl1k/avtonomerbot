@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from datetime import date
 from io import BytesIO
 from typing import List, Union
+
 import cloudscraper
 from requests import Request
 from bs4 import BeautifulSoup
@@ -13,12 +14,15 @@ scraper = cloudscraper.create_scraper()
 logger = logging.getLogger(__name__)
 
 CTYPE_RU_CARS = 1
+CTYPE_RU_SPECIAL_VEHICLES = 3
 CTYPE_RU_MOTORCYCLES = 4
 CTYPE_RU_PUBLIC_TRSNSPORT = 16
+CTYPE_RU_POLICE_VEHICLES = 20
+CTYPE_SU_PRIVATE_VEHICLES_1980 = 2
 TAG_NEW_LETTER_COMBINATION = 13
 AN_BASE_URL = "https://platesmania.com"
 
-# region, type
+# region, ctype
 US_STATES_ID = {
     "pa": (7538, 111),
     "oh": (7535, 71),
@@ -199,69 +203,6 @@ class AvSearchResult:
     cars: List[AvCar]
 
 
-def translate_to_latin(text):
-    chars = ("авекмнорстухАВЕКМНОРСТУХ", "abekmhopctyxabekmhopctyx")
-    table = dict([(ord(a), ord(b)) for (a, b) in zip(*chars)])
-    return text.lower().translate(table)
-
-
-def translate_to_cyr(text):
-    chars = ("iI", "\u0456\u0406")
-    table = dict([(ord(a), ord(b)) for (a, b) in zip(*chars)])
-    return text.lower().translate(table)
-
-
-def validate_ru_plate_number(number):
-    res = re.match(r"^[abekmhopctyx]{1}\d{3}[abekmhopctyx]{2}\d{2,3}$", number)
-    return res
-
-
-def validate_ru_pt_plate_number(number):
-    res = re.match(r"^[abekmhopctyx]{2}\d{5}$", number)
-    return res
-
-
-def validate_ru_moto_plate_number(number):
-    res = re.match(r"^\d{4}[abekmhopctyx]{2}\d{2,3}$", number)
-    return res
-
-
-def reformat_ru_pt_query(number):
-    return f"{number[:5]} {number[5:]}"
-
-
-def validate_su_plate_number(number):
-    res = re.match(r"^[абвгдежзиклмнопрстуфхцчшщэюя\u0456]{1}\d{4}[абвгдежзиклмнопрстуфхцчшщэюя\u0456АБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЩЭЮЯ\u0406]{2}$", number)
-    return res
-
-
-def validate_ru_plate_series(number):
-    res = re.match(r"^[abekmhopctyx]{3}\d{2,3}$", number)
-    return res
-
-
-def validate_us_plate_series(number):
-    res = re.match(r"^([a-z]{2})\s+([a-z]{3})$", number)
-    if res:
-        state = res.groups()[0]
-        if state in US_STATES_ID.keys():
-            return res
-
-
-def validate_ru_region(req):
-    res = re.match(r"^ru(\d{2,3})$", req.lower())
-    if res:
-        state = res.groups()[0]
-        if state in RU_REGIONS_ID.keys():
-            return res
-
-
-def translate_to_cyrillic(number):
-    chars = ("abekmhopctyx", "АВЕКМНОРСТУХ")
-    table = dict([(ord(a), ord(b)) for (a, b) in zip(*chars)])
-    return number.translate(table)
-
-
 def ensure_https(url):
     if url.lower().startswith("http:"):
         return "https:" + url[5:]
@@ -295,7 +236,7 @@ def parse_search_results(resp) -> Union[AvSearchResult, None]:
     return AvSearchResult(total_results, cars)
 
 
-def search_ru(fastsearch=None, ctype=None, regions=None, tags=None) -> Union[AvSearchResult, None]:
+def search_ru(fastsearch=None, ctype=None, regions=None, tags=None) -> AvSearchResult | None:
     params = {}
     if fastsearch is not None:
         params["fastsearch"] = fastsearch
@@ -313,16 +254,28 @@ def search_ru(fastsearch=None, ctype=None, regions=None, tags=None) -> Union[AvS
     return parse_search_results(resp)
 
 
-def search_su(plate_number) -> Union[AvSearchResult, None]:
+def search_su(plate_number, ctype=None) -> AvSearchResult | None:
+    params = {"nomer": plate_number}
+    if ctype is not None:
+        params["ctype"] = ctype
     resp = scraper.get(
         f"{AN_BASE_URL}/su/gallery.php",
-        params={
-            "fastsearch": "{} {} {}".format(
-                plate_number[:1],
-                plate_number[1:5],
-                plate_number[5:],
-            ),
-        },
+        params=params,
+    )
+    return parse_search_results(resp)
+
+
+def search_us(nomer=None, region=None, ctype=None) -> AvSearchResult | None:
+    params = {"gal": "us"}
+    if nomer is not None:
+        params["nomer"] = nomer
+    if region is not None:
+        params["region"] = region
+    if ctype is not None:
+        params["ctype"] = ctype
+    resp = scraper.get(
+        f"{AN_BASE_URL}/us/gallery.php",
+        params=params,
     )
     return parse_search_results(resp)
 

@@ -1,41 +1,44 @@
 from unittest.mock import patch
 
 from avbot import avtonomer
+from avbot.cmd import ru, su
 
 
 def test_validate_ru_cars_license_plate():
-    assert avtonomer.validate_ru_plate_number("a123aa123")
-    assert avtonomer.validate_ru_plate_number("a123aa12")
-    assert not avtonomer.validate_ru_plate_number("a123aa1")
-    assert not avtonomer.validate_ru_plate_number("aaa123")
+    assert ru.RuVehicleRequest.validate("a123aa123")
+    assert ru.RuVehicleRequest.validate("a123   aa 123")
+    assert ru.RuVehicleRequest.validate("a123aa12")
+    assert not ru.RuVehicleRequest.validate("a123aa1")
+    assert not ru.RuVehicleRequest.validate("aaa123")
 
 
 def test_validate_ru_pt_license_plates():
-    assert avtonomer.validate_ru_pt_plate_number("ax12377")
-    assert not avtonomer.validate_ru_pt_plate_number("ax123177")
-    assert not avtonomer.validate_ru_pt_plate_number("a12399")
+    assert ru.RuPublicTransportRequest.validate("ax12377")
+    assert not ru.RuPublicTransportRequest.validate("ax123177")
+    assert not ru.RuPublicTransportRequest.validate("a12399")
 
 
 def test_validate_ru_moto_license_plates():
-    assert avtonomer.validate_ru_moto_plate_number("1234ax77")
-    assert avtonomer.validate_ru_moto_plate_number("1234ax177")
-    assert not avtonomer.validate_ru_moto_plate_number("123ax77")
-    assert not avtonomer.validate_ru_moto_plate_number("1234x77")
+    assert ru.RuMotorcyclesRequest.validate("1234ax77")
+    assert ru.RuMotorcyclesRequest.validate("1234ax177")
+    assert not ru.RuMotorcyclesRequest.validate("123ax77")
+    assert not ru.RuMotorcyclesRequest.validate("1234x77")
 
 
 def test_validate_su_license_plate():
-    assert avtonomer.validate_su_plate_number("ж8028ХА")
-    assert avtonomer.validate_su_plate_number("ж8028ха")
-    assert avtonomer.validate_su_plate_number("ж8028Н\u0406")
-    assert not avtonomer.validate_su_plate_number("ж8028Х")
-    assert not avtonomer.validate_su_plate_number("b8028ХА")
+    assert su.SuVehicleRequest.validate("ж8028ХА")
+    assert su.SuVehicleRequest.validate("ж 8028   ХА")
+    assert su.SuVehicleRequest.validate("ж8028ха")
+    assert su.SuVehicleRequest.validate("ж8028Н\u0406")
+    assert not su.SuVehicleRequest.validate("ж8028Х")
+    assert not su.SuVehicleRequest.validate("b8028ХА")
 
 
 def test_validate_plate_series():
-    assert avtonomer.validate_ru_plate_series("aaa199")
-    assert avtonomer.validate_ru_plate_series("aaa19")
-    assert not avtonomer.validate_ru_plate_series("aa199")
-    assert not avtonomer.validate_ru_plate_series("aaaa199")
+    assert ru.RuSeriesInfoRequest.validate("aaa199")
+    assert ru.RuSeriesInfoRequest.validate("aaa19")
+    assert not ru.RuSeriesInfoRequest.validate("aa199")
+    assert not ru.RuSeriesInfoRequest.validate("aaaa199")
 
 
 @patch("avbot.avtonomer.scraper.get")

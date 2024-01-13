@@ -1,8 +1,8 @@
 import logging
 from telegram.ext import Updater
 
-import settings
-from commands import register_commands
+from avbot import settings
+from avbot.commands import register_commands
 
 logger = logging.getLogger(__name__)
 updater = Updater(

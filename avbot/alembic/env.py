@@ -1,15 +1,14 @@
-from logging.config import fileConfig
-
-from sqlalchemy import engine_from_config, pool, create_engine
-
-from alembic import context
-
 import os
 import sys
+from logging.config import fileConfig
 
-sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(__file__), '..')))
+from sqlalchemy import create_engine
+from alembic import context
 
-import models
+app_path = os.path.realpath(os.path.join(os.path.dirname(__file__), '../..'))
+sys.path.insert(0, app_path)
+
+from avbot import models  # NOQA
 
 
 config = context.config

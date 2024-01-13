@@ -10,9 +10,9 @@ COPY Pipfile* /tmp/
 RUN cd /tmp && pipenv requirements > requirements.txt \
     && pip install -r /tmp/requirements.txt
 
-ADD avbot /app
+ADD avbot /app/avbot
 WORKDIR /app
-RUN pybabel compile -d locale -D avbot
+RUN pybabel compile -d avbot/locale -D avbot
 
 USER app
-CMD ["./start.sh"]
+CMD ["avbot/start.sh"]

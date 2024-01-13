@@ -6,11 +6,12 @@ import telegram
 from celery import Celery, Task
 from requests.exceptions import RequestException
 
-import avtonomer
-import cache
-import db
-import settings
-from i18n import setup_locale, _
+from avbot import avtonomer
+from avbot import cache
+from avbot import db
+from avbot import settings
+from avbot.cmd.base import translate_to_cyrillic
+from avbot.i18n import setup_locale
 
 PHOTO_NOT_FOUND = "assets/not-found.png"
 TASKS_TIME_LIMIT = 15
@@ -30,7 +31,7 @@ def use_translation(fun):
 
 def get_car_caption(car, plate, page, count):
     date = car.date.strftime("%d.%m.%Y")
-    plate = avtonomer.translate_to_cyrillic(plate)
+    plate = translate_to_cyrillic(plate).replace(" ", "")
     return (
         f"{plate} {date}\n"
         f"{car.make} {car.model}\n"
@@ -59,7 +60,10 @@ class TelegramTask(Task):
     def on_failure(self, exc, task_id, args, kwargs, einfo):
         bot.send_message(
             args[0],
-            "Error has occurred, try again later / Произошла ошибка, попробуйте ещё раз",
+            (
+                "Error has occurred, try again later / "
+                "Произошла ошибка, попробуйте ещё раз"
+            ),
             reply_to_message_id=args[1],
         )
 
@@ -73,47 +77,43 @@ class TelegramTask(Task):
     soft_time_limit=TASKS_TIME_LIMIT,
 )
 @use_translation
-def search_license_plate(self, chat_id, message_id, search_query_id, page, edit):
+def an_paginated_search(
+    self, chat_id, message_id, search_query_id, page=0, edit=False
+):
     search_query = db.get_search_query(search_query_id)
     lp_num = search_query.query_text
     lp_type = search_query.num_type
-    key = f"avtonomer.search_{lp_type}({lp_num})"
 
-    result = cache.get(key)
+    from avbot.plate_formats import get_plate_format_by_type
+    plate_format = get_plate_format_by_type(lp_type)
+    cache_key = f"an_paginated_search-{lp_type}-{lp_num}"
+
+    result = cache.get(cache_key)
     if not result:
-        if lp_type == "ru":
-            result = avtonomer.search_ru(lp_num, avtonomer.CTYPE_RU_CARS)
-        elif lp_type == "ru-pt":
-            result = avtonomer.search_ru(
-                lp_num, avtonomer.CTYPE_RU_PUBLIC_TRSNSPORT)
-        elif lp_type == "ru-moto":
-            result = avtonomer.search_ru(
-                lp_num, avtonomer.CTYPE_RU_MOTORCYCLES)
-        elif lp_type == "su":
-            result = avtonomer.search_su(lp_num)
+        result = plate_format.search(lp_num)
 
-    if result is None:
+    if not result:
         logger.warning(f"No data for query {lp_num} {lp_type}")
         bot.send_message(
-            chat_id, _("No data"),
+            chat_id, plate_format.msg_no_data(),
             reply_to_message_id=message_id,
         )
         return
 
     if not result.total_results:
         bot.send_message(
-            chat_id, _("Nothing found"),
+            chat_id, plate_format.msg_no_results(lp_num),
             reply_to_message_id=message_id,
         )
         return
 
-    cache.add(key, result, timedelta(minutes=5))
+    cache.add(cache_key, result, timedelta(minutes=5))
 
     car = result.cars[page]
     cars_count = len(result.cars)
-    key = f"avtonomer.load_photo({car.thumb_url})"
+    cache_key_photo = f"avtonomer.load_photo({car.thumb_url})"
 
-    file_id = cache.get(key)
+    file_id = cache.get(cache_key_photo)
     if not file_id:
         photo = avtonomer.load_photo(car.thumb_url)
         if not photo:
@@ -139,7 +139,10 @@ def search_license_plate(self, chat_id, message_id, search_query_id, page, edit)
         )
 
     if not file_id:
-        cache.add(key, message.photo[-1].file_id, timedelta(minutes=30))
+        cache.add(
+            cache_key_photo,
+            message.photo[-1].file_id, timedelta(minutes=30),
+        )
 
 
 @app.task(
@@ -151,154 +154,35 @@ def search_license_plate(self, chat_id, message_id, search_query_id, page, edit)
     soft_time_limit=TASKS_TIME_LIMIT,
 )
 @use_translation
-def get_series_ru(self, chat_id, message_id, search_query_id):
+def an_listed_search(self, chat_id, message_id, search_query_id):
     search_query = db.get_search_query(search_query_id)
-    series_number = search_query.query_text
-    key = f"avtonomer.get_series_ru2({series_number})"
+    lp_num = search_query.query_text
+    lp_type = search_query.num_type
 
-    result = cache.get(key)
+    from avbot.plate_formats import get_plate_format_by_type
+    plate_format = get_plate_format_by_type(lp_type)
+
+    cache_key = f"an_listed_search-{lp_type}-{lp_num}"
+
+    result = cache.get(cache_key)
     if not result:
-        result = avtonomer.search_ru(
-            fastsearch="{}*{}".format(
-                series_number[:1],
-                series_number[1:],
-            ),
-        )
+        result = plate_format.search(lp_num)
 
     if result is None:
-        logger.warning(f"No data for query {series_number}")
+        logger.warning(f"No data for query {lp_type} {lp_num}")
         bot.send_message(
-            chat_id, _("No data"),
+            chat_id, plate_format.msg_no_data(),
             reply_to_message_id=message_id,
         )
         return
 
-    cache.add(key, result, timedelta(minutes=5))
+    cache.add(cache_key, result, timedelta(minutes=5))
 
-    url = avtonomer.get_series_ru_url(series_number)
-    series_number = avtonomer.translate_to_cyrillic(series_number)
-    if result.total_results > 0:
-        cnt = result.total_results
-        message = _("Pictures in the series [{series_number}]({url}): {cnt}").format(
-            series_number=series_number,
-            url=url,
-            cnt=cnt,
-        )
-        message += "\n\n" + _("Latest plates:") + "\n"
-        message += "\n".join([
-            "• {} /{} — {} {}".format(
-                car.date,
-                avtonomer.translate_to_latin(
-                    car.license_plate.replace(" ", "")).upper(),
-                car.make,
-                car.model,
-            )
-            for car in result.cars
-        ])
-    else:
-        message = _("No plates in the series [{series_number}]({url}) yet").format(
-            series_number=series_number,
-            url=url,
-        )
-
-    bot.send_message(
-        chat_id,
-        message,
-        parse_mode="Markdown",
-        reply_to_message_id=message_id,
-    )
-
-
-@app.task(
-    base=TelegramTask,
-    bind=True,
-    autoretry_for=(RequestException, ),
-    retry_kwargs={"max_retries": 2},
-    default_retry_delay=2,
-    soft_time_limit=TASKS_TIME_LIMIT,
-)
-@use_translation
-def get_series_us(self, chat_id, message_id, search_query_id):
-    search_query = db.get_search_query(search_query_id)
-    result = avtonomer.validate_us_plate_series(search_query.query_text)
-    state, series_number = result.groups()
-    key = f"avtonomer.get_series_us({state}, {series_number})"
-    state_id, ctype_id = avtonomer.US_STATES_ID[state]
-
-    result = cache.get(key)
-    if not result:
-        result = avtonomer.get_series_us(state_id, ctype_id, series_number)
-
-    if result is None:
-        logger.warning(f"Not data for query {series_number}")
-        bot.send_message(
-            chat_id, _("No data"),
-            reply_to_message_id=message_id,
-        )
-        return
-
-    cache.add(key, result, timedelta(minutes=5))
-
-    url = avtonomer.get_series_us_url(state_id, ctype_id, series_number)
     message = (
-        _("There are no plates in the series [{series_number}]({url}) of the state `{state}`")
-        .format(series_number=series_number, url=url, state=state)
-        if result == 0
-        else _("Pictures in the series [{series_number}]({url}) of the state `{state}`: {result}").format(
-            series_number=series_number,
-            url=url,
-            state=state,
-            result=result,
-        )
+        plate_format.msg_with_results(lp_num, result)
+        if result.total_results > 0
+        else plate_format.msg_no_results(lp_num)
     )
-    bot.send_message(
-        chat_id,
-        message,
-        parse_mode="Markdown",
-        reply_to_message_id=message_id,
-    )
-
-
-@app.task(
-    base=TelegramTask,
-    bind=True,
-    autoretry_for=(RequestException, ),
-    retry_kwargs={"max_retries": 2},
-    default_retry_delay=2,
-    soft_time_limit=TASKS_TIME_LIMIT,
-)
-@use_translation
-def get_ru_region(self, chat_id, message_id, search_query_id):
-    search_query = db.get_search_query(search_query_id)
-    result = avtonomer.validate_ru_region(search_query.query_text)
-    region = result.groups()[0]
-    key = f"avtonomer.get_ru_region({region})"
-    region_name, region_id = avtonomer.RU_REGIONS_ID[region]
-
-    result = cache.get(key)
-    if not result:
-        result = avtonomer.search_ru(
-            ctype=1,
-            regions=[region],
-            tags=[avtonomer.TAG_NEW_LETTER_COMBINATION],
-        )
-
-    cache.add(key, result, timedelta(minutes=5))
-
-    message = _("Region *{region}* — {region_name}").format(
-        region=region, region_name=region_name)
-    if result is not None and result.total_results > 0:
-        message += "\n\n" + _("Latest series:") + "\n"
-        message += "\n".join([
-            "• {} /{} — {} {}".format(
-                car.date,
-                avtonomer.translate_to_latin(
-                    car.license_plate.replace(" ", "")).upper(),
-                car.make,
-                car.model,
-            )
-            for car in result.cars
-        ])
     bot.send_message(
         chat_id,
         message,

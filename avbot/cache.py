@@ -2,7 +2,7 @@ from functools import wraps
 import pickle
 import redis
 
-import settings
+from avbot import settings
 
 _cache = redis.StrictRedis.from_url(settings.REDIS_CACHE_URL)
 

@@ -1,8 +1,26 @@
-from sqlalchemy import BigInteger, Column, DateTime, ForeignKey, Integer, String
+from enum import IntEnum, auto
+
+from sqlalchemy import BigInteger, Column, DateTime, ForeignKey, Integer, \
+    String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
+from avbot.i18n import __
+
 Base = declarative_base()
+
+
+class Country(IntEnum):
+    ru = auto()
+    su = auto()
+    us = auto()
+
+
+COUNTRY_LABELS = {
+    Country.ru.value: __("Russia"),
+    Country.su.value: __("Soviet Union"),
+    Country.us.value: __("United States"),
+}
 
 
 class User(Base):
@@ -13,6 +31,7 @@ class User(Base):
     last_name = Column(String)
     username = Column(String)
     language_code = Column(String)
+    country = Column(Integer)
     created_at = Column(DateTime)
     search_queries = relationship("SearchQuery")
 

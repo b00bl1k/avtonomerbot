@@ -4,8 +4,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.exc import NoResultFound
 
-import models
-import settings
+from avbot import models
+from avbot import settings
 
 engine = create_engine(settings.DATABASE_URL)
 Session = sessionmaker(bind=engine)
