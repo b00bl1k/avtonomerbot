@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-alembic upgrade head
+alembic -c avbot/alembic.ini upgrade head
 python -m avbot.bot
