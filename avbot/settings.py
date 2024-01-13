@@ -3,11 +3,10 @@ import os
 
 from avbot import i18n
 
-BOT_TOKEN = os.environ["BOT_TOKEN"]
-AN_KEY = os.environ["AN_KEY"]
-REDIS_CACHE_URL = os.environ["REDIS_CACHE_URL"]
-DATABASE_URL = os.environ["DATABASE_URL"]
-CELERY_BROKER_URL = os.environ["CELERY_BROKER_URL"]
+BOT_TOKEN = os.environ.get("BOT_TOKEN", "1234:test")
+REDIS_CACHE_URL = os.environ.get("REDIS_CACHE_URL", "redis://localhost:6379")
+DATABASE_URL = os.environ.get("DATABASE_URL", "postgresql://user:pwd@pg/db")
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379")
 SENTRY_DSN = os.environ.get("SENTRY_DSN")
 SENTRY_SAMPLE_RATE = float(os.environ.get("SENTRY_SAMPLE_RATE", 0.2))
 FWD_CHAT_ID = os.environ.get("FWD_CHAT_ID")

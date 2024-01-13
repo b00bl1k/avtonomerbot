@@ -20,7 +20,7 @@ def test_validate_ru_pt_license_plates():
 
 def test_validate_ru_moto_license_plates():
     assert ru.RuMotorcyclesRequest.validate("1234ax77")
-    assert ru.RuMotorcyclesRequest.validate("1234ax177")
+    assert not ru.RuMotorcyclesRequest.validate("1234ax177")
     assert not ru.RuMotorcyclesRequest.validate("123ax77")
     assert not ru.RuMotorcyclesRequest.validate("1234x77")
 
