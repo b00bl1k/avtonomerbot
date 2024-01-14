@@ -291,7 +291,8 @@ def on_preprocess_update(update: Update, context: CallbackContext):
 
 
 def register_commands(dp):
-    dp.add_handler(MessageHandler(Filters.update, on_preprocess_update))
+    dp.add_handler(MessageHandler(Filters.update, on_preprocess_update), 0)
+    dp.add_handler(CallbackQueryHandler(on_preprocess_update), 0)
     dp.add_handler(CommandHandler("start", on_start_command), 1)
     dp.add_handler(CommandHandler("help", on_help_command), 1)
     dp.add_handler(CommandHandler("setlang", on_setlang_command), 1)

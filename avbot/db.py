@@ -46,7 +46,8 @@ def get_or_create_user(telegram_id, first_name, last_name, username,
 
 
 def get_user(telegram_id):
-    return session.query(models.Usaer).get(telegram_id)
+    return session.query(models.User)\
+        .filter_by(telegram_id=telegram_id).first()
 
 
 def add_search_query(user, query_text, num_type="ru"):
