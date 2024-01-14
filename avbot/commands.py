@@ -216,7 +216,7 @@ def on_query_callback(update: Update, context: CallbackContext):
 
 def on_search_paginate(update: Update, context: CallbackContext):
     query = update.callback_query
-    search_query_id, page_str = query.data.split("-")
+    search_query_id, page_str = query.data.split("-", maxsplit=1)
     page = int(page_str)
     search_query = db.get_search_query(int(search_query_id))
     if not search_query:
@@ -230,7 +230,8 @@ def on_search_paginate(update: Update, context: CallbackContext):
     chat_id = query.message.chat_id
     message_id = query.message.message_id
     lang = get_current_lang()
-    tasks.search_license_plate.delay(
+    plate_format = get_plate_format_by_type(search_query.num_type)
+    plate_format.task.delay(
         chat_id, message_id, search_query.id, page=page, edit=True,
         language=lang)
 
