@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-01-13 22:30+0500\n"
+"POT-Creation-Date: 2024-01-15 22:41+0500\n"
 "PO-Revision-Date: 2024-01-07 01:41+0500\n"
 "Last-Translator: Alexey <alex@b00bl1k.ru>\n"
 "Language: en\n"
@@ -59,20 +59,32 @@ msgstr ""
 msgid "Something went wrong, please try again."
 msgstr ""
 
-#: avbot/commands.py:242
+#: avbot/commands.py:243
 msgid "Unsupported request. Use /help"
 msgstr ""
 
-#: avbot/cmd/base.py:4 avbot/models.py:20
+#: avbot/cmd/base.py:4 avbot/models.py:23
 msgid "Russia"
 msgstr ""
 
-#: avbot/cmd/base.py:5 avbot/models.py:21
+#: avbot/cmd/base.py:5 avbot/models.py:24
 msgid "Soviet Union"
 msgstr ""
 
-#: avbot/cmd/base.py:6 avbot/models.py:22
+#: avbot/cmd/base.py:6 avbot/models.py:25
 msgid "United States"
+msgstr ""
+
+#: avbot/models.py:26
+msgid "Kazakhstan"
+msgstr ""
+
+#: avbot/models.py:27
+msgid "Uzbekistan"
+msgstr ""
+
+#: avbot/models.py:28
+msgid "Georgia"
 msgstr ""
 
 #: avbot/cmd/base.py:26
@@ -83,12 +95,20 @@ msgstr ""
 msgid "Nothing found"
 msgstr ""
 
+#: avbot/cmd/ge.py:12
+msgid "vehicle plate (2014)"
+msgstr ""
+
+#: avbot/cmd/kz.py:12
+msgid "private vehicle plate (2012)"
+msgstr ""
+
 #: avbot/cmd/ru.py:13
 msgid "vehicle plate 🚗"
 msgstr ""
 
 #: avbot/cmd/ru.py:34
-msgid "public transport plate 🚌"
+msgid "trailer plate"
 msgstr ""
 
 #: avbot/cmd/ru.py:55
@@ -100,34 +120,42 @@ msgid "motorcycle plate 🏍"
 msgstr ""
 
 #: avbot/cmd/ru.py:97
-msgid "police vehicles plate 🚓"
+msgid "transit plate"
 msgstr ""
 
 #: avbot/cmd/ru.py:118
+msgid "public transport plate 🚌"
+msgstr ""
+
+#: avbot/cmd/ru.py:139
+msgid "police vehicles plate 🚓"
+msgstr ""
+
+#: avbot/cmd/ru.py:160
 msgid "info about region"
 msgstr ""
 
-#: avbot/cmd/ru.py:142
+#: avbot/cmd/ru.py:184
 msgid "Region *{region}* — {region_name}"
 msgstr ""
 
-#: avbot/cmd/ru.py:150
+#: avbot/cmd/ru.py:192
 msgid "Latest series:"
 msgstr ""
 
-#: avbot/cmd/ru.py:168
+#: avbot/cmd/ru.py:210
 msgid "info about vehicle plate series"
 msgstr ""
 
-#: avbot/cmd/ru.py:197
+#: avbot/cmd/ru.py:239
 msgid "No plates in the series [{series_number}]({url}) yet"
 msgstr ""
 
-#: avbot/cmd/ru.py:207
+#: avbot/cmd/ru.py:249
 msgid "Pictures in the series [{series_number}]({url}): {cnt}"
 msgstr ""
 
-#: avbot/cmd/ru.py:209
+#: avbot/cmd/ru.py:251
 msgid "Latest plates:"
 msgstr ""
 
@@ -145,6 +173,10 @@ msgstr ""
 
 #: avbot/cmd/us.py:52
 msgid "Pictures in the series [{series}]({url}) of the state `{state}`: {cnt}"
+msgstr ""
+
+#: avbot/cmd/uz.py:12
+msgid "private vehicle plate"
 msgstr ""
 
 #~ msgid "Регион *{region}* — {region_name}"

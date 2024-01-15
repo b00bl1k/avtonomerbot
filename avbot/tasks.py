@@ -10,7 +10,6 @@ from avbot import avtonomer
 from avbot import cache
 from avbot import db
 from avbot import settings
-from avbot.cmd.base import translate_to_cyrillic
 from avbot.i18n import setup_locale
 
 PHOTO_NOT_FOUND = "assets/not-found.png"
@@ -31,7 +30,7 @@ def use_translation(fun):
 
 def get_car_caption(car, plate, page, count):
     date = car.date.strftime("%d.%m.%Y")
-    plate = translate_to_cyrillic(plate).replace(" ", "")
+    plate = plate.upper().replace(" ", "")
     return (
         f"{plate} {date}\n"
         f"{car.make} {car.model}\n"

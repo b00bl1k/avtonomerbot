@@ -14,12 +14,18 @@ class Country(IntEnum):
     ru = auto()
     su = auto()
     us = auto()
+    kz = auto()
+    uz = auto()
+    ge = auto()
 
 
 COUNTRY_LABELS = {
     Country.ru.value: __("Russia"),
     Country.su.value: __("Soviet Union"),
     Country.us.value: __("United States"),
+    Country.kz.value: __("Kazakhstan"),
+    Country.uz.value: __("Uzbekistan"),
+    Country.ge.value: __("Georgia"),
 }
 
 

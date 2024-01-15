@@ -28,17 +28,17 @@ class RuVehicleRequest(PlateRequestBase):
         return an.search_ru(validated_query, an.CTYPE_RU_CARS)
 
 
-class RuPublicTransportRequest(PlateRequestBase):
-    num_type = "ru-pt"
-    example = "аа12377"
-    description = __("public transport plate 🚌")
+class RuTrailersRequest(PlateRequestBase):
+    num_type = "ru-trailer"
+    example = "ан239936"
+    description = __("trailer plate")
     task = tasks.an_paginated_search
 
     @classmethod
     def validate(cls, query):
         query = translate_to_latin(query)
         res = re.match(
-            r"^([abekmhopctyx]{2})\s*(\d{3})\s*(\d{2})$",
+            r"^([abekmhopctyx]{2})\s*(\d{4})\s*(\d{2})$",
             query
         )
         if res:
@@ -46,7 +46,7 @@ class RuPublicTransportRequest(PlateRequestBase):
 
     @classmethod
     def search(cls, validated_query):
-        return an.search_ru(validated_query, an.CTYPE_RU_PUBLIC_TRSNSPORT)
+        return an.search_ru(validated_query, an.CTYPE_RU_TRAILERS)
 
 
 class RuSpecialVehiclesRequest(PlateRequestBase):
@@ -89,6 +89,48 @@ class RuMotorcyclesRequest(PlateRequestBase):
     @classmethod
     def search(cls, validated_query):
         return an.search_ru(validated_query, an.CTYPE_RU_MOTORCYCLES)
+
+
+class RuTransitRequest(PlateRequestBase):
+    num_type = "ru-transit"
+    example = "нт005х77"
+    description = __("transit plate")
+    task = tasks.an_paginated_search
+
+    @classmethod
+    def validate(cls, query):
+        query = translate_to_latin(query)
+        res = re.match(
+            r"^([abekmhopctyx]{2})\s*(\d{3})\s*([abekmhopctyx]{1})\s*(\d{2})$",
+            query
+        )
+        if res:
+            return " ".join(res.groups())
+
+    @classmethod
+    def search(cls, validated_query):
+        return an.search_ru(validated_query, an.CTYPE_RU_NEW_TRANSIT)
+
+
+class RuPublicTransportRequest(PlateRequestBase):
+    num_type = "ru-pt"
+    example = "аа12377"
+    description = __("public transport plate 🚌")
+    task = tasks.an_paginated_search
+
+    @classmethod
+    def validate(cls, query):
+        query = translate_to_latin(query)
+        res = re.match(
+            r"^([abekmhopctyx]{2})\s*(\d{3})\s*(\d{2})$",
+            query
+        )
+        if res:
+            return " ".join(res.groups())
+
+    @classmethod
+    def search(cls, validated_query):
+        return an.search_ru(validated_query, an.CTYPE_RU_PUBLIC_TRSNSPORT)
 
 
 class RuPoliceVehiclesRequest(PlateRequestBase):
@@ -223,9 +265,11 @@ class RuSeriesInfoRequest(PlateRequestBase):
 
 RU_PLATES = [
     RuVehicleRequest,
-    RuPublicTransportRequest,
+    RuTrailersRequest,
     RuSpecialVehiclesRequest,
     RuMotorcyclesRequest,
+    RuTransitRequest,
+    RuPublicTransportRequest,
     RuPoliceVehiclesRequest,
     RuRegionInfoRequest,
     RuSeriesInfoRequest,

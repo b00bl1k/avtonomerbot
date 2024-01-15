@@ -14,10 +14,15 @@ scraper = cloudscraper.create_scraper()
 logger = logging.getLogger(__name__)
 
 CTYPE_RU_CARS = 1
+CTYPE_RU_TRAILERS = 2
 CTYPE_RU_SPECIAL_VEHICLES = 3
 CTYPE_RU_MOTORCYCLES = 4
+CTYPE_RU_NEW_TRANSIT = 15
 CTYPE_RU_PUBLIC_TRSNSPORT = 16
 CTYPE_RU_POLICE_VEHICLES = 20
+CTYPE_GE_VEHICLES_2014 = 1
+CTYPE_KZ_PRIVATE_VEHICLES_2012 = 5
+CTYPE_UZ_PRIVATE_VEHICLES = 1
 CTYPE_SU_PRIVATE_VEHICLES_1980 = 2
 TAG_NEW_LETTER_COMBINATION = 13
 AN_BASE_URL = "https://platesmania.com"
@@ -254,12 +259,12 @@ def search_ru(fastsearch=None, ctype=None, regions=None, tags=None) -> AvSearchR
     return parse_search_results(resp)
 
 
-def search_su(plate_number, ctype=None) -> AvSearchResult | None:
-    params = {"nomer": plate_number}
+def search(gallery, nomer, ctype=None) -> AvSearchResult | None:
+    params = {"nomer": nomer}
     if ctype is not None:
         params["ctype"] = ctype
     resp = scraper.get(
-        f"{AN_BASE_URL}/su/gallery.php",
+        f"{AN_BASE_URL}/{gallery}/gallery.php",
         params=params,
     )
     return parse_search_results(resp)

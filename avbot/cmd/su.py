@@ -24,7 +24,8 @@ class SuVehicleRequest(PlateRequestBase):
 
     @classmethod
     def search(cls, validated_query):
-        return an.search_su(validated_query, an.CTYPE_SU_PRIVATE_VEHICLES_1980)
+        return an.search(
+            "su", validated_query, an.CTYPE_SU_PRIVATE_VEHICLES_1980)
 
 
 SU_PLATES = [
