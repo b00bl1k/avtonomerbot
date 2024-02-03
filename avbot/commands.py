@@ -144,7 +144,7 @@ def on_search_query(update: Update, context: CallbackContext):
                 REPLIES.update({msg.message_id: update.message.message_id})
         if not is_vin:
             update.message.reply_text(
-                _("Invalid request"),
+                _("Invalid request, try /help command"),
                 quote=True,
             )
     elif found_count == 1:

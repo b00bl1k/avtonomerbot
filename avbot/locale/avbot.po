@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-01-15 22:41+0500\n"
+"POT-Creation-Date: 2024-02-03 17:14+0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -45,7 +45,7 @@ msgid "Current country: {}"
 msgstr ""
 
 #: avbot/commands.py:147
-msgid "Invalid request"
+msgid "Invalid request, try /help command"
 msgstr ""
 
 #: avbot/commands.py:177 avbot/commands.py:187
