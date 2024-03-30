@@ -17,6 +17,7 @@ class Country(IntEnum):
     kz = auto()
     uz = auto()
     ge = auto()
+    ua = auto()
 
 
 COUNTRY_LABELS = {
@@ -26,6 +27,7 @@ COUNTRY_LABELS = {
     Country.kz.value: __("Kazakhstan"),
     Country.uz.value: __("Uzbekistan"),
     Country.ge.value: __("Georgia"),
+    Country.ua.value: __("Ukraine"),
 }
 
 

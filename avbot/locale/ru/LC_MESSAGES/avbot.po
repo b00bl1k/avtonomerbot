@@ -5,20 +5,19 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: \n"
+"Project-Id-Version:  \n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-02-03 17:14+0500\n"
+"POT-Creation-Date: 2024-03-30 17:02+0500\n"
 "PO-Revision-Date: 2024-02-03 17:14+0500\n"
 "Last-Translator: Alexey <alex@b00bl1k.ru>\n"
-"Language-Team: Русский\n"
 "Language: ru\n"
+"Language-Team: Русский\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 "
-"&& (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "Generated-By: Babel 2.14.0\n"
-"X-Generator: Poedit 3.4.1\n"
 
 #: avbot/commands.py:21
 msgid ""
@@ -74,35 +73,39 @@ msgstr "Произошла ошибка, попробуйте ещё раз."
 msgid "Unsupported request. Use /help"
 msgstr "Неподдерживаемый запрос, используйте /help получения справки"
 
-#: avbot/cmd/base.py:4 avbot/models.py:23
+#: avbot/models.py:24
 msgid "Russia"
 msgstr "Россия"
 
-#: avbot/cmd/base.py:5 avbot/models.py:24
+#: avbot/models.py:25
 msgid "Soviet Union"
 msgstr "СССР"
 
-#: avbot/cmd/base.py:6 avbot/models.py:25
+#: avbot/models.py:26
 msgid "United States"
 msgstr "США"
 
-#: avbot/models.py:26
+#: avbot/models.py:27
 msgid "Kazakhstan"
 msgstr "Казахстан"
 
-#: avbot/models.py:27
+#: avbot/models.py:28
 msgid "Uzbekistan"
 msgstr "Узбекистан"
 
-#: avbot/models.py:28
+#: avbot/models.py:29
 msgid "Georgia"
 msgstr "Грузия"
 
-#: avbot/cmd/base.py:26
+#: avbot/models.py:30
+msgid "Ukraine"
+msgstr "Украина"
+
+#: avbot/cmd/base.py:20
 msgid "No data"
 msgstr "Нет данных"
 
-#: avbot/cmd/base.py:30
+#: avbot/cmd/base.py:24
 msgid "Nothing found"
 msgstr "Ничего не найдено"
 
@@ -174,6 +177,11 @@ msgstr "Последние номера:"
 msgid "private vehicles (1980) 🚗"
 msgstr "частные автомобили (1980) 🚗"
 
+#: avbot/cmd/ua.py:12
+#, fuzzy
+msgid "regulat plates (2004)"
+msgstr "обычные номера (2004)"
+
 #: avbot/cmd/us.py:13
 msgid "info about state plate series (possible states: pa, oh, nc, ny)"
 msgstr "информация о серии (поддерживаемые штаты: pa, oh, nc, ny)"
@@ -189,3 +197,4 @@ msgstr "Фотографий в серии [{series}]({url}) штата `{state}
 #: avbot/cmd/uz.py:12
 msgid "private vehicle plate"
 msgstr "частные автомобили"
+

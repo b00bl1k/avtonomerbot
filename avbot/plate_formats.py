@@ -6,6 +6,7 @@ from avbot.cmd.us import US_PLATES
 from avbot.cmd.kz import KZ_PLATES
 from avbot.cmd.uz import UZ_PLATES
 from avbot.cmd.ge import GE_PLATES
+from avbot.cmd.ua import UA_PLATES
 
 PLATE_FORMATS = {
     models.Country.ru.value: RU_PLATES,
@@ -14,6 +15,7 @@ PLATE_FORMATS = {
     models.Country.kz.value: KZ_PLATES,
     models.Country.uz.value: UZ_PLATES,
     models.Country.us.value: US_PLATES,
+    models.Country.ua.value: UA_PLATES,
 }
 
 

@@ -1,4 +1,4 @@
-from avbot.cmd import ru, su, ge, kz, uz
+from avbot.cmd import ru, su, ge, kz, uz, ua
 
 
 def test_validate_ru_car_license_plates():
@@ -83,3 +83,10 @@ def test_validate_uz_private_vehicle_plates():
     assert uz.UzPrivateVehiclesRequest.validate("01 a  123 bc")
     assert not uz.UzPrivateVehiclesRequest.validate("01 123bc")
     assert not uz.UzPrivateVehiclesRequest.validate("01 123aac")
+
+
+def test_validate_ua_regular_plates_2004():
+    assert ua.UaPrivateVehiclesRequest.validate("aa 1234 bb")
+    assert ua.UaPrivateVehiclesRequest.validate("ka1234hc")
+    assert not ua.UaPrivateVehiclesRequest.validate("ka1234hca")
+    assert not ua.UaPrivateVehiclesRequest.validate("kaa124hc")

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-02-03 17:14+0500\n"
+"POT-Creation-Date: 2024-03-30 17:02+0500\n"
 "PO-Revision-Date: 2024-01-07 01:41+0500\n"
 "Last-Translator: Alexey <alex@b00bl1k.ru>\n"
 "Language: en\n"
@@ -63,35 +63,39 @@ msgstr ""
 msgid "Unsupported request. Use /help"
 msgstr ""
 
-#: avbot/cmd/base.py:4 avbot/models.py:23
+#: avbot/models.py:24
 msgid "Russia"
 msgstr ""
 
-#: avbot/cmd/base.py:5 avbot/models.py:24
+#: avbot/models.py:25
 msgid "Soviet Union"
 msgstr ""
 
-#: avbot/cmd/base.py:6 avbot/models.py:25
+#: avbot/models.py:26
 msgid "United States"
 msgstr ""
 
-#: avbot/models.py:26
+#: avbot/models.py:27
 msgid "Kazakhstan"
 msgstr ""
 
-#: avbot/models.py:27
+#: avbot/models.py:28
 msgid "Uzbekistan"
 msgstr ""
 
-#: avbot/models.py:28
+#: avbot/models.py:29
 msgid "Georgia"
 msgstr ""
 
-#: avbot/cmd/base.py:26
+#: avbot/models.py:30
+msgid "Ukraine"
+msgstr ""
+
+#: avbot/cmd/base.py:20
 msgid "No data"
 msgstr ""
 
-#: avbot/cmd/base.py:30
+#: avbot/cmd/base.py:24
 msgid "Nothing found"
 msgstr ""
 
@@ -161,6 +165,10 @@ msgstr ""
 
 #: avbot/cmd/su.py:12
 msgid "private vehicles (1980) 🚗"
+msgstr ""
+
+#: avbot/cmd/ua.py:12
+msgid "regulat plates (2004)"
 msgstr ""
 
 #: avbot/cmd/us.py:13

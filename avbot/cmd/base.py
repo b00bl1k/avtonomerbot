@@ -1,10 +1,4 @@
-from avbot.i18n import _, __
-
-COUNTRIES = {
-    "ru": __("Russia"),
-    "su": __("Soviet Union"),
-    "us": __("United States"),
-}
+from avbot.i18n import _
 
 
 class PlateRequestBase:
