@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-03-30 17:02+0500\n"
+"POT-Creation-Date: 2024-03-30 17:12+0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -167,7 +167,7 @@ msgid "private vehicles (1980) 🚗"
 msgstr ""
 
 #: avbot/cmd/ua.py:12
-msgid "regulat plates (2004)"
+msgid "regular plates (2004)"
 msgstr ""
 
 #: avbot/cmd/us.py:13

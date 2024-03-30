@@ -9,7 +9,7 @@ from avbot.cmd.base import PlateRequestBase, translate_to_latin
 class UaPrivateVehiclesRequest(PlateRequestBase):
     num_type = "ua"
     example = "aa1234bb"
-    description = __("regulat plates (2004)")
+    description = __("regular plates (2004)")
     task = tasks.an_paginated_search
 
     @classmethod
