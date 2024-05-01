@@ -159,7 +159,7 @@ msgstr "Свежие серии:"
 
 #: avbot/cmd/ru.py:210
 msgid "info about vehicle plate series"
-msgstr "информаци о серии"
+msgstr "информация о серии"
 
 #: avbot/cmd/ru.py:239
 msgid "No plates in the series [{series_number}]({url}) yet"

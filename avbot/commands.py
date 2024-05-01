@@ -1,4 +1,5 @@
 import logging
+import re
 
 from telegram import (
     Update,
@@ -12,7 +13,6 @@ from telegram.ext import (
 from avbot import db
 from avbot import models
 from avbot import settings
-from avbot import tasks
 from avbot.i18n import translations, get_current_lang, setup_locale, _, __
 from avbot.plate_formats import PLATE_FORMATS, get_plate_format_by_type
 
@@ -134,7 +134,7 @@ def on_search_query(update: Update, context: CallbackContext):
                 found.append((validated, country_code, plate))
 
     found_count = len(found)
-    # TODO reduce results using user.counrtry_code
+    # TODO reduce results using user.country_code
 
     if found_count == 0:
         is_vin = (len(query) == VIN_LENGTH)
@@ -294,9 +294,15 @@ def register_commands(dp):
     dp.add_handler(MessageHandler(Filters.update, on_preprocess_update), 0)
     dp.add_handler(CallbackQueryHandler(on_preprocess_update), 0)
     dp.add_handler(CommandHandler("start", on_start_command), 1)
-    dp.add_handler(CommandHandler("help", on_help_command), 1)
-    dp.add_handler(CommandHandler("setlang", on_setlang_command), 1)
-    dp.add_handler(CommandHandler("setcountry", on_setcountry_command), 1)
+    dp.add_handler(MessageHandler(Filters.regex(
+        re.compile(r"help", re.IGNORECASE)
+    ), on_help_command), 1)
+    dp.add_handler(MessageHandler(Filters.regex(
+        re.compile(r"setlang", re.IGNORECASE)
+    ), on_setlang_command), 1)
+    dp.add_handler(MessageHandler(Filters.regex(
+        re.compile(r"setcountry", re.IGNORECASE)
+    ), on_setcountry_command), 1)
     dp.add_handler(MessageHandler(Filters.reply, on_reply_msg), 1)
     dp.add_handler(MessageHandler(Filters.text, on_search_query), 1)
     dp.add_handler(MessageHandler(Filters.update, on_unsupported_msg), 1)

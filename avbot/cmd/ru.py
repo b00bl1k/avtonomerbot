@@ -214,11 +214,11 @@ class RuSeriesInfoRequest(PlateRequestBase):
     def validate(cls, query):
         query = translate_to_latin(query)
         res = re.match(
-            r"^([abekmhopctyx]{3})(\d{2,3})$",
+            r"^([abekmhopctyx]{1})[\s\*]*([abekmhopctyx]{2})(\d{2,3})$",
             query,
         )
         if res:
-            region = res.groups()[1]
+            region = res.groups()[2]
             if region in an.RU_REGIONS_ID.keys():
                 return "".join(res.groups())
 
