@@ -22,7 +22,7 @@ def get_one_or_create(model, create_method="", create_method_kwargs=None,
         created = getattr(model, create_method, model)(**kwargs)
         try:
             session.add(created)
-            session.flush()
+            session.commit()
             return created, True
         except IntegrityError:
             session.rollback()
