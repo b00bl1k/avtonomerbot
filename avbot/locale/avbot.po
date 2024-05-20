@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-03-30 17:12+0500\n"
+"POT-Creation-Date: 2024-05-20 22:56+0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.14.0\n"
 
-#: avbot/commands.py:21
+#: avbot/commands.py:20
 msgid ""
 "Welcome to @avtonomerbot\n"
 "\n"
@@ -25,40 +25,44 @@ msgid ""
 "Type /setlang to change language."
 msgstr ""
 
-#: avbot/commands.py:26
+#: avbot/commands.py:25
 msgid ""
 "Bot for searching on the platesmania.com website\n"
 "\n"
 "Please input one of the following commands:\n"
 msgstr ""
 
-#: avbot/commands.py:83
+#: avbot/commands.py:81
 msgid "Current language: {}"
 msgstr ""
 
-#: avbot/commands.py:102
+#: avbot/commands.py:100
 msgid "Choose country:"
 msgstr ""
 
-#: avbot/commands.py:114
+#: avbot/commands.py:112
 msgid "Current country: {}"
 msgstr ""
 
-#: avbot/commands.py:147
+#: avbot/commands.py:126
+msgid "VIN contains invalid characters"
+msgstr ""
+
+#: avbot/commands.py:153
 msgid "Invalid request, try /help command"
 msgstr ""
 
-#: avbot/commands.py:177 avbot/commands.py:187
+#: avbot/commands.py:183 avbot/commands.py:193
 msgid ""
 "Request: {}\n"
 "Specify type of the plate:"
 msgstr ""
 
-#: avbot/commands.py:225
+#: avbot/commands.py:231
 msgid "Something went wrong, please try again."
 msgstr ""
 
-#: avbot/commands.py:243
+#: avbot/commands.py:249
 msgid "Unsupported request. Use /help"
 msgstr ""
 
@@ -90,11 +94,43 @@ msgstr ""
 msgid "Ukraine"
 msgstr ""
 
-#: avbot/cmd/base.py:20
+#: avbot/vininfo.py:18
+msgid "Model"
+msgstr ""
+
+#: avbot/vininfo.py:20
+msgid "License plate"
+msgstr ""
+
+#: avbot/vininfo.py:23
+msgid "Manufactured year"
+msgstr ""
+
+#: avbot/vininfo.py:25
+msgid "Engine power"
+msgstr ""
+
+#: avbot/vininfo.py:25
+msgid "hp"
+msgstr ""
+
+#: avbot/vininfo.py:27
+msgid "Engine displacement"
+msgstr ""
+
+#: avbot/vininfo.py:27
+msgid "ccm"
+msgstr ""
+
+#: avbot/vininfo.py:29
+msgid "Engine number"
+msgstr ""
+
+#: avbot/cmd/base.py:21
 msgid "No data"
 msgstr ""
 
-#: avbot/cmd/base.py:24
+#: avbot/cmd/base.py:25
 msgid "Nothing found"
 msgstr ""
 

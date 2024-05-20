@@ -6,10 +6,7 @@ import telegram
 from celery import Celery, Task
 from requests.exceptions import RequestException
 
-from avbot import avtonomer
-from avbot import cache
-from avbot import db
-from avbot import settings
+from avbot import avtonomer, cache, db, settings, vininfo
 from avbot.i18n import setup_locale
 
 PHOTO_NOT_FOUND = "assets/not-found.png"
@@ -188,3 +185,31 @@ def an_listed_search(self, chat_id, message_id, search_query_id):
         parse_mode="Markdown",
         reply_to_message_id=message_id,
     )
+
+
+@app.task(
+    base=TelegramTask,
+    bind=True,
+    autoretry_for=(RequestException, ),
+    retry_kwargs={"max_retries": 2},
+    default_retry_delay=2,
+    soft_time_limit=TASKS_TIME_LIMIT,
+)
+@use_translation
+def vin_get_info(self, chat_id, message_id, vin, user_id):
+    result = vininfo.get_vin_info(vin)
+    if not result:
+        if settings.FWD_CHAT_ID:
+            msg = bot.forward_message(settings.FWD_CHAT_ID, chat_id, message_id)
+            key = f"forwarding-{msg.message_id}"
+            cache.add(key, message_id, time=timedelta(minutes=60))
+    else:
+        user = db.get_user_by_id(user_id)
+        db.add_search_query(user, vin, "vin")
+        message = vininfo.format_msg(result)
+        bot.send_message(
+            chat_id,
+            message,
+            parse_mode="Markdown",
+            reply_to_message_id=message_id,
+        )

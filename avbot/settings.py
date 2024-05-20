@@ -19,6 +19,9 @@ PROXY_URL = os.environ.get("PROXY_URL")
 PROXY_USERNAME = os.environ.get("PROXY_USERNAME")
 PROXY_PASSWORD = os.environ.get("PROXY_PASSWORD")
 LOCALE_PATH = "avbot/locale"
+VIN_PROVIDER_URL = os.environ.get("VIN_PROVIDER_URL")
+VIN_PROVIDER_TOKEN = os.environ.get("VIN_PROVIDER_TOKEN")
+
 
 REQUEST_KWARGS = (
     {

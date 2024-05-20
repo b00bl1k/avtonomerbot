@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  \n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-03-30 17:12+0500\n"
+"POT-Creation-Date: 2024-05-20 22:56+0500\n"
 "PO-Revision-Date: 2024-02-03 17:14+0500\n"
 "Last-Translator: Alexey <alex@b00bl1k.ru>\n"
 "Language: ru\n"
@@ -19,7 +19,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.14.0\n"
 
-#: avbot/commands.py:21
+#: avbot/commands.py:20
 msgid ""
 "Welcome to @avtonomerbot\n"
 "\n"
@@ -31,7 +31,7 @@ msgstr ""
 "Введите /help для получения справки по вводу запросов.\n"
 "Введите /setlang для смены языка."
 
-#: avbot/commands.py:26
+#: avbot/commands.py:25
 msgid ""
 "Bot for searching on the platesmania.com website\n"
 "\n"
@@ -41,23 +41,27 @@ msgstr ""
 "\n"
 "Введите одну из следующих команд:\n"
 
-#: avbot/commands.py:83
+#: avbot/commands.py:81
 msgid "Current language: {}"
 msgstr "Текущий язык: {}"
 
-#: avbot/commands.py:102
+#: avbot/commands.py:100
 msgid "Choose country:"
 msgstr "Выберите страну:"
 
-#: avbot/commands.py:114
+#: avbot/commands.py:112
 msgid "Current country: {}"
 msgstr "Выбранная страна: {}"
 
-#: avbot/commands.py:147
+#: avbot/commands.py:126
+msgid "VIN contains invalid characters"
+msgstr "VIN содержит неправильные символы"
+
+#: avbot/commands.py:153
 msgid "Invalid request, try /help command"
 msgstr "Некорректный запрос, попробуйте команду /help"
 
-#: avbot/commands.py:177 avbot/commands.py:187
+#: avbot/commands.py:183 avbot/commands.py:193
 msgid ""
 "Request: {}\n"
 "Specify type of the plate:"
@@ -65,11 +69,11 @@ msgstr ""
 "Запрос: {}\n"
 "Уточните тип номера:"
 
-#: avbot/commands.py:225
+#: avbot/commands.py:231
 msgid "Something went wrong, please try again."
 msgstr "Произошла ошибка, попробуйте ещё раз."
 
-#: avbot/commands.py:243
+#: avbot/commands.py:249
 msgid "Unsupported request. Use /help"
 msgstr "Неподдерживаемый запрос, используйте /help получения справки"
 
@@ -101,11 +105,43 @@ msgstr "Грузия"
 msgid "Ukraine"
 msgstr "Украина"
 
-#: avbot/cmd/base.py:20
+#: avbot/vininfo.py:18
+msgid "Model"
+msgstr "Модель"
+
+#: avbot/vininfo.py:20
+msgid "License plate"
+msgstr "Госномер"
+
+#: avbot/vininfo.py:23
+msgid "Manufactured year"
+msgstr "Год производства"
+
+#: avbot/vininfo.py:25
+msgid "Engine power"
+msgstr "Мощность двигателя"
+
+#: avbot/vininfo.py:25
+msgid "hp"
+msgstr "л.с."
+
+#: avbot/vininfo.py:27
+msgid "Engine displacement"
+msgstr "Объем двигателя"
+
+#: avbot/vininfo.py:27
+msgid "ccm"
+msgstr "куб. см."
+
+#: avbot/vininfo.py:29
+msgid "Engine number"
+msgstr "Номер двигателя"
+
+#: avbot/cmd/base.py:21
 msgid "No data"
 msgstr "Нет данных"
 
-#: avbot/cmd/base.py:24
+#: avbot/cmd/base.py:25
 msgid "Nothing found"
 msgstr "Ничего не найдено"
 
@@ -196,4 +232,7 @@ msgstr "Фотографий в серии [{series}]({url}) штата `{state}
 #: avbot/cmd/uz.py:12
 msgid "private vehicle plate"
 msgstr "частные автомобили"
+
+#~ msgid "Model:"
+#~ msgstr ""
 

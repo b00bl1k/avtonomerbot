@@ -10,11 +10,10 @@ from telegram.ext import (
     CallbackContext, CommandHandler, Filters, MessageHandler,
     CallbackQueryHandler)
 
-from avbot import db
-from avbot import models
-from avbot import settings
+from avbot import cache, db, models, settings, tasks
 from avbot.i18n import translations, get_current_lang, setup_locale, _, __
 from avbot.plate_formats import PLATE_FORMATS, get_plate_format_by_type
+from avbot.utils import validate_vin
 
 logger = logging.getLogger(__name__)
 
@@ -27,9 +26,6 @@ HELP = __("""Bot for searching on the platesmania.com website
 
 Please input one of the following commands:
 """)
-
-REPLIES = {}
-VIN_LENGTH = 17
 
 
 def ensure_user_created(telegram_id, from_user):
@@ -118,6 +114,21 @@ def on_setcountry_query(update: Update, context: CallbackContext, arg: str):
     )
 
 
+def on_vin_command(update: Update, context: CallbackContext):
+    chat_id = update.message.chat.id
+    message_id = update.message.message_id
+    user = context.user_data.get("user")
+    query = update.message.text
+    if not validate_vin(query):
+        update.message.reply_text(
+            _("VIN contains invalid characters"),
+            quote=True,
+        )
+    else:
+        tasks.vin_get_info.delay(
+            chat_id, message_id, query, user.id, language=get_current_lang())
+
+
 def on_search_query(update: Update, context: CallbackContext):
     chat_id = update.message.chat.id
     message_id = update.message.message_id
@@ -135,18 +146,11 @@ def on_search_query(update: Update, context: CallbackContext):
 
     found_count = len(found)
     # TODO reduce results using user.country_code
-
     if found_count == 0:
-        is_vin = (len(query) == VIN_LENGTH)
-        if settings.FWD_CHAT_ID:
-            msg = update.message.forward(settings.FWD_CHAT_ID)
-            if is_vin:
-                REPLIES.update({msg.message_id: update.message.message_id})
-        if not is_vin:
-            update.message.reply_text(
-                _("Invalid request, try /help command"),
-                quote=True,
-            )
+        update.message.reply_text(
+            _("Invalid request, try /help command"),
+            quote=True,
+        )
     elif found_count == 1:
         (validated_query, country_code, plate) = found[0]
         search_query = db.add_search_query(
@@ -253,7 +257,7 @@ def on_reply_msg(update: Update, context: CallbackContext):
         return
     if update.message.reply_to_message:
         replied_id = update.message.reply_to_message.message_id
-        original_message_id = REPLIES.pop(replied_id, None)
+        original_message_id = cache.get(f"forwarding-{replied_id}")
         if original_message_id:
             context.bot.send_message(
                 chat_id=update.message.reply_to_message.forward_from.id,
@@ -303,6 +307,9 @@ def register_commands(dp):
     dp.add_handler(MessageHandler(Filters.regex(
         re.compile(r"setcountry", re.IGNORECASE)
     ), on_setcountry_command), 1)
+    dp.add_handler(MessageHandler(Filters.regex(
+        re.compile(r"[0-9a-z]{17}", re.IGNORECASE)
+    ), on_vin_command), 1)
     dp.add_handler(MessageHandler(Filters.reply, on_reply_msg), 1)
     dp.add_handler(MessageHandler(Filters.text, on_search_query), 1)
     dp.add_handler(MessageHandler(Filters.update, on_unsupported_msg), 1)
