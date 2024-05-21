@@ -241,8 +241,6 @@ def on_search_paginate(update: Update, context: CallbackContext):
 
 
 def on_unsupported_msg(update: Update, context: CallbackContext):
-    if settings.FWD_CHAT_ID:
-        update.message.forward(settings.FWD_CHAT_ID)
     update.message.reply_markdown(
         _("Unsupported request. Use /help"),
         quote=True,
@@ -308,7 +306,7 @@ def register_commands(dp):
         re.compile(r"setcountry", re.IGNORECASE)
     ), on_setcountry_command), 1)
     dp.add_handler(MessageHandler(Filters.regex(
-        re.compile(r"[0-9a-z]{17}", re.IGNORECASE)
+        re.compile(r"^[0-9a-z]{17}$", re.IGNORECASE)
     ), on_vin_command), 1)
     dp.add_handler(MessageHandler(Filters.reply, on_reply_msg), 1)
     dp.add_handler(MessageHandler(Filters.text, on_search_query), 1)
