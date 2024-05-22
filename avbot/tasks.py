@@ -210,6 +210,5 @@ def vin_get_info(self, chat_id, message_id, vin, user_id):
         bot.send_message(
             chat_id,
             message,
-            parse_mode="Markdown",
             reply_to_message_id=message_id,
         )
