@@ -247,6 +247,10 @@ def on_unsupported_msg(update: Update, context: CallbackContext):
     )
 
 
+def on_edit_message(update: Update, context: CallbackContext):
+    logger.info("Got an edited message")
+
+
 def on_reply_msg(update: Update, context: CallbackContext):
     if not settings.FWD_CHAT_ID:
         return
@@ -296,6 +300,9 @@ def register_commands(dp):
     dp.add_handler(MessageHandler(Filters.update, on_preprocess_update), 0)
     dp.add_handler(CallbackQueryHandler(on_preprocess_update), 0)
     dp.add_handler(CommandHandler("start", on_start_command), 1)
+    dp.add_handler(MessageHandler(
+        Filters.update.edited_message, on_edit_message,
+    ), 1)
     dp.add_handler(MessageHandler(Filters.regex(
         re.compile(r"help", re.IGNORECASE)
     ), on_help_command), 1)
