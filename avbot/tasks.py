@@ -9,7 +9,7 @@ from requests.exceptions import RequestException
 from avbot import avtonomer, cache, db, settings, vininfo
 from avbot.i18n import setup_locale
 
-PHOTO_NOT_FOUND = "assets/not-found.png"
+PHOTO_NOT_FOUND = "avbot/assets/not-found.png"
 TASKS_TIME_LIMIT = 15
 
 app = Celery("avbot", broker=settings.CELERY_BROKER_URL)
