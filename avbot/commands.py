@@ -10,7 +10,7 @@ from telegram.ext import (
     CallbackContext, CommandHandler, Filters, MessageHandler,
     CallbackQueryHandler)
 
-from avbot import cache, db, models, settings, tasks
+from avbot import cache, db, models, settings, tasks, version
 from avbot.i18n import translations, get_current_lang, setup_locale, _, __
 from avbot.plate_formats import PLATE_FORMATS, get_plate_format_by_type
 from avbot.utils import validate_vin
@@ -50,6 +50,10 @@ def on_help_command(update: Update, context: CallbackContext):
             ))
         message.append("")
     update.message.reply_markdown("\n".join(message))
+
+
+def on_version_command(update: Update, context: CallbackContext):
+    update.message.reply_markdown(f"v{version.__version__}")
 
 
 def on_setlang_command(update: Update, context: CallbackContext):
@@ -300,6 +304,7 @@ def register_commands(dp):
     dp.add_handler(MessageHandler(Filters.update, on_preprocess_update), 0)
     dp.add_handler(CallbackQueryHandler(on_preprocess_update), 0)
     dp.add_handler(CommandHandler("start", on_start_command), 1)
+    dp.add_handler(CommandHandler("version", on_version_command), 1)
     dp.add_handler(MessageHandler(
         Filters.update.edited_message, on_edit_message,
     ), 1)
