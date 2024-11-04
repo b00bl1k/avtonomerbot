@@ -1,7 +1,7 @@
 import logging
 import os
 
-from avbot import i18n
+from avbot import i18n, version
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "1234:test")
 REDIS_CACHE_URL = os.environ.get("REDIS_CACHE_URL", "redis://localhost:6379")
@@ -45,4 +45,8 @@ i18n.load_translations(LOCALE_PATH)
 
 if SENTRY_DSN:
     import sentry_sdk
-    sentry_sdk.init(SENTRY_DSN, traces_sample_rate=SENTRY_SAMPLE_RATE)
+    sentry_sdk.init(
+        SENTRY_DSN,
+        release="avtonomerbot@{version.__version__}",
+        traces_sample_rate=SENTRY_SAMPLE_RATE,
+    )
