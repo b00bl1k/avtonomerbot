@@ -229,11 +229,15 @@ def parse_search_results(resp) -> Union[AvSearchResult, None]:
 
     cars = []
     for panel in panels:
-        page_url = "{}{}".format(AN_BASE_URL, panel.select("a")[0]["href"])
-        thumb_url = ensure_https(panel.select("img")[0]["src"])
-        license_plate = panel.select("img")[1]["alt"]
+        links = panel.select("a")
+        images = panel.select("img")
+        if len(links) != 2 or len(images) != 2:
+            continue
+        page_url = "{}{}".format(AN_BASE_URL, links[0]["href"])
+        thumb_url = ensure_https(images[0]["src"])
+        license_plate = images[1]["alt"]
         dt = parse(panel.select("small.pull-right")[0].text)
-        model_arr = panel.select("a")[1].text.split(" ", maxsplit=1)
+        model_arr = links[1].text.split(" ", maxsplit=1)
         if len(model_arr) == 2:
             make, model = model_arr
         else:
