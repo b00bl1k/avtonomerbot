@@ -31,6 +31,17 @@ def test_search_su_is_success(mockget):
 
 
 @patch("avbot.avtonomer.scraper.get")
+def test_search_us_is_success(mockget):
+    with open("tests/us_fastsearch.html", "r") as f:
+        data = f.read()
+    mockget.return_value.text = data
+    result = avtonomer.search("us", "kgh")
+    assert len(result.cars) == 3
+    assert result.cars[0].make == "Chrysler"
+    assert result.cars[0].model == "LeBaron"
+
+
+@patch("avbot.avtonomer.scraper.get")
 def test_search_ru_is_failed_because_no_data(mockget):
     mockget.return_value.text = ""
     result = avtonomer.search_ru("а111аа777")

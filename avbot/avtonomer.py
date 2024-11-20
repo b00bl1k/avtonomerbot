@@ -231,7 +231,7 @@ def parse_search_results(resp) -> Union[AvSearchResult, None]:
     for panel in panels:
         links = panel.select("a")
         images = panel.select("img")
-        if len(links) != 2 or len(images) != 2:
+        if len(links) < 2 or len(images) < 2:
             continue
         page_url = "{}{}".format(AN_BASE_URL, links[0]["href"])
         thumb_url = ensure_https(images[0]["src"])
