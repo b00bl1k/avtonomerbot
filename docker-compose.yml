@@ -12,7 +12,7 @@ services:
   redis:
     image: "redis:alpine"
   db:
-    image: postgres
+    image: postgres:16.1
     env_file:
       - .env
     volumes:

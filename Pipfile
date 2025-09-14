@@ -19,6 +19,7 @@ beautifulsoup4 = "==4.*"
 python-dateutil = "==2.*"
 cloudscraper = "*"
 babel = "*"
+urllib3 = "1.*"
 
 [requires]
-python_version = "3.11"
+python_version = "3.12"

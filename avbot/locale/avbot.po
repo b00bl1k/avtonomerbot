@@ -1,21 +1,21 @@
 # Translations template for PROJECT.
-# Copyright (C) 2024 ORGANIZATION
+# Copyright (C) 2025 ORGANIZATION
 # This file is distributed under the same license as the PROJECT project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-05-20 22:56+0500\n"
+"POT-Creation-Date: 2025-09-15 00:47+0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.14.0\n"
+"Generated-By: Babel 2.17.0\n"
 
 #: avbot/commands.py:20
 msgid ""
@@ -32,33 +32,36 @@ msgid ""
 "Please input one of the following commands:\n"
 msgstr ""
 
-#: avbot/commands.py:81
+#: avbot/commands.py:83
+#, python-brace-format
 msgid "Current language: {}"
 msgstr ""
 
-#: avbot/commands.py:100
+#: avbot/commands.py:102
 msgid "Choose country:"
 msgstr ""
 
-#: avbot/commands.py:112
+#: avbot/commands.py:114
+#, python-brace-format
 msgid "Current country: {}"
 msgstr ""
 
-#: avbot/commands.py:126
+#: avbot/commands.py:128
 msgid "VIN contains invalid characters"
 msgstr ""
 
-#: avbot/commands.py:153
+#: avbot/commands.py:155
 msgid "Invalid request, try /help command"
 msgstr ""
 
-#: avbot/commands.py:183 avbot/commands.py:193
+#: avbot/commands.py:185 avbot/commands.py:195
+#, python-brace-format
 msgid ""
 "Request: {}\n"
 "Specify type of the plate:"
 msgstr ""
 
-#: avbot/commands.py:231
+#: avbot/commands.py:233
 msgid "Something went wrong, please try again."
 msgstr ""
 
@@ -126,11 +129,11 @@ msgstr ""
 msgid "Engine number"
 msgstr ""
 
-#: avbot/cmd/base.py:21
+#: avbot/cmd/base.py:20
 msgid "No data"
 msgstr ""
 
-#: avbot/cmd/base.py:25
+#: avbot/cmd/base.py:24
 msgid "Nothing found"
 msgstr ""
 
@@ -175,6 +178,7 @@ msgid "info about region"
 msgstr ""
 
 #: avbot/cmd/ru.py:184
+#, python-brace-format
 msgid "Region *{region}* — {region_name}"
 msgstr ""
 
@@ -187,10 +191,12 @@ msgid "info about vehicle plate series"
 msgstr ""
 
 #: avbot/cmd/ru.py:239
+#, python-brace-format
 msgid "No plates in the series [{series_number}]({url}) yet"
 msgstr ""
 
 #: avbot/cmd/ru.py:249
+#, python-brace-format
 msgid "Pictures in the series [{series_number}]({url}): {cnt}"
 msgstr ""
 
@@ -206,16 +212,22 @@ msgstr ""
 msgid "regular plates (2004)"
 msgstr ""
 
-#: avbot/cmd/us.py:13
-msgid "info about state plate series (possible states: pa, oh, nc, ny)"
+#: avbot/cmd/us.py:23
+msgid "info about state plate series (possible states: ga, pa, oh, nc, ny)"
 msgstr ""
 
-#: avbot/cmd/us.py:42
-msgid "There are no plates in the series [{series}]({url}) of the state `{state}`"
+#: avbot/cmd/us.py:68
+#, python-brace-format
+msgid ""
+"There are no plates in the series [{series}]({url}) of the state "
+"`{state_name}`"
 msgstr ""
 
-#: avbot/cmd/us.py:52
-msgid "Pictures in the series [{series}]({url}) of the state `{state}`: {cnt}"
+#: avbot/cmd/us.py:78
+#, python-brace-format
+msgid ""
+"Pictures in the series [{series}]({url}) of the state `{state_name}`: "
+"{cnt}"
 msgstr ""
 
 #: avbot/cmd/uz.py:12

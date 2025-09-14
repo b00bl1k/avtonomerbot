@@ -1,8 +1,8 @@
-FROM python:3.11
+FROM python:3.12
 
 RUN apt update \
     && apt install -y nodejs \
-    && pip install pipenv==2023.6.2 \
+    && pip install pipenv==2025.0.4 \
     && groupadd -r app \
     && useradd -r -g app app
 

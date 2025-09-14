@@ -1,6 +1,7 @@
 from unittest.mock import patch
 
 from avbot import avtonomer
+from avbot.cmd.us import UsSeriesInfoRequest
 
 
 @patch("avbot.avtonomer.scraper.get")
@@ -54,5 +55,7 @@ def test_series_ru_url():
 
 
 def test_series_us_url():
-    url = avtonomer.get_series_us_url(1, 2, "rbb")
-    assert "https://platesmania.com/us/gallery.php?gal=us&region=1&ctype=2&nomer=rbb+%2A" == url
+    url = UsSeriesInfoRequest.get_series_us_url("oh", "rbb")
+    assert "https://platesmania.com/us/gallery.php?gal=us&region=7535&ctype=71&nomer=rbb+%2A" == url
+    url = UsSeriesInfoRequest.get_series_us_url("ga", "asd")
+    assert "https://platesmania.com/us/gallery.php?gal=us&region=7510&ctype=91&nomer=asd%2A" == url

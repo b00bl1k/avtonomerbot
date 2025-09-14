@@ -1,4 +1,5 @@
 import re
+from requests import Request
 
 from avbot import avtonomer as an
 from avbot import tasks
@@ -8,11 +9,11 @@ from avbot.cmd.base import PlateRequestBase, translate_to_latin, \
 
 # region, ctype
 US_STATES_ID = {
-    "ga": (7510, 91),  # four digits
-    "pa": (7538, 111),
-    "oh": (7535, 71),
-    "nc": (7527, 101),
-    "ny": (7534, 21),
+    "ga": {"name": "Georgia", "id": (7510, 91), "query": "{}*"},  # four digits
+    "pa": {"name": "Pennsylvania", "id": (7538, 111), "query": "{} *"},
+    "oh": {"name": "Ohio", "id": (7535, 71), "query": "{} *"},
+    "nc": {"name": "North Carolina", "id": (7527, 101), "query": "{} *"},
+    "ny": {"name": "New York", "id": (7534, 21), "query": "{} *"},
 }
 
 
@@ -36,30 +37,46 @@ class UsSeriesInfoRequest(PlateRequestBase):
     @classmethod
     def search(cls, validated_query):
         state, series = validated_query.split()
-        state_id, ctype_id = US_STATES_ID[state]
+        state_id, ctype_id = US_STATES_ID[state]["id"]
+        query = US_STATES_ID[state]["query"]
         return an.search_us(
-            nomer="{} *".format(series),
+            nomer=query.format(series),
             region=state_id,
             ctype=ctype_id,
         )
 
     @classmethod
+    def get_series_us_url(cls, state, series):
+        state_id, ctype_id = US_STATES_ID[state]["id"]
+        query = US_STATES_ID[state]["query"].format(series)
+        return Request(
+            "GET",
+            f"{an.AN_BASE_URL}/us/gallery.php",
+            params={
+                "gal": "us",
+                "region": state_id,
+                "ctype": ctype_id,
+                "nomer": query,
+            },
+        ).prepare().url
+
+    @classmethod
     def msg_no_results(cls, validated_query):
         state, series = validated_query.split()
-        state_id, ctype_id = US_STATES_ID[state]
-        url = an.get_series_us_url(state_id, ctype_id, series)
-        message = _("There are no plates in the series [{series}]({url}) of the state `{state}`")\
-            .format(series=series, url=url, state=state)
+        url = cls.get_series_us_url(state, series)
+        state_name = US_STATES_ID[state]["name"]
+        message = _("There are no plates in the series [{series}]({url}) of the state `{state_name}`")\
+            .format(series=series, url=url, state_name=state_name)
         return message
 
     @classmethod
     def msg_with_results(cls, validated_query, result):
         state, series = validated_query.split()
-        state_id, ctype_id = US_STATES_ID[state]
-        url = an.get_series_us_url(state_id, ctype_id, series)
+        url = cls.get_series_us_url(state, series)
         cnt = result.total_results
-        message = _("Pictures in the series [{series}]({url}) of the state `{state}`: {cnt}")\
-            .format(series=series, url=url, state=state, cnt=cnt)
+        state_name = US_STATES_ID[state]["name"]
+        message = _("Pictures in the series [{series}]({url}) of the state `{state_name}`: {cnt}")\
+            .format(series=series, url=url, state_name=state_name, cnt=cnt)
         return message
 
 

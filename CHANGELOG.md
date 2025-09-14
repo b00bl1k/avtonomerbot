@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - New USA state support: Georgia
 
+### Changed
+
+- Switch to Python 3.12
+
 ## [1.2.0] - 2025-09-14
 
 ### Added

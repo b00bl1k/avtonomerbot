@@ -301,19 +301,6 @@ def get_series_ru_url(series_number):
     ).prepare().url
 
 
-def get_series_us_url(region, ctype, series_number):
-    return Request(
-        "GET",
-        f"{AN_BASE_URL}/us/gallery.php",
-        params={
-            "gal": "us",
-            "region": region,
-            "ctype": ctype,
-            "nomer": "{} *".format(series_number),
-        },
-    ).prepare().url
-
-
 def get_series_us(region, ctype, series_number):
     resp = scraper.get(
         f"{AN_BASE_URL}/us/gallery.php",
