@@ -28,13 +28,6 @@ CTYPE_UA_REGULAR_PLATES_2004 = 1
 TAG_NEW_LETTER_COMBINATION = 13
 AN_BASE_URL = "https://platesmania.com"
 
-# region, ctype
-US_STATES_ID = {
-    "pa": (7538, 111),
-    "oh": (7535, 71),
-    "nc": (7527, 101),
-    "ny": (7534, 21),
-}
 
 RU_REGIONS_ID = {
     "01": ("Республика Адыгея", "10001"),
